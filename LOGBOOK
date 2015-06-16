@@ -1,0 +1,121 @@
+## Nicolas Servant, Aurélie Teissandier, Elodie Girard, Marine Séjourné
+## PolyA-seq pipeline
+
+
+################################################################################
+##
+## NEXT STEPS
+##
+################################################################################
+
+
+
+################################################################################
+##
+## LOGBOOK
+##
+################################################################################
+##--------------------
+## 25-04-15
+##--------------------
+   
+   o Integration of differential analysis from A. Teissandier
+
+##--------------------
+## 21-04-15
+##--------------------
+
+   o Update doc
+   o Add combine options in configuration file
+
+##--------------------
+## 04-03-15
+##--------------------
+
+  o Pipeline outputs valided by Galina.
+
+##--------------------
+## 10-02-15
+##--------------------
+
+  o Fix bug in stretch A calculation
+  o Change annotation process, i.e. 1/ le from gene 2/ intron from trs
+
+##--------------------
+## 08-01-15
+##--------------------
+
+   o Add minoverlap options for annotation
+
+##--------------------
+## 18-12-14
+##--------------------
+
+   o Fix bug in main_pip.sh
+
+   o Change in LE overlapping function (at leats one base overlap)
+
+   o Change annotation outputs (see Galina.)
+
+##--------------------
+## 08-12-14
+##--------------------
+
+   o Annotation of peaks - add gene name / last exon / not last exon / intron
+ 
+   o Test annotation scripts - keep them as it for the moment. To check for further developments
+
+   o Add wrapper to take a list of files as input
+
+   o Final peaks filering step
+
+##--------------------
+## 20-11-14
+##--------------------
+Meeting - GB/MD/AT/NS
+
+   o Comparaison de chaque peak avec le dernier exon entier (script 11) ou avec le dernier peaks (script 12)
+
+   o Liste des vrai positifs -> pour valider le model
+
+   o Parameter optimaux : MAX_DIST_MERGE = 170 / MIN_NB_READS_PER_PEAK = 0
+   -> Filtrer les peaks avant DESeq (Somme des replicats > n*5)
+
+   o A ajouter : taille de debordement dans l'intron. On retire les peaks exoniquesqui débordent un peu dans intron - on garde uniquement les LE et les peaks introniques dans au moins un transcripts
+
+   o Ajouter parametre grahique pipeline step2
+
+   o Ajouter classification site qui overlap la fin du transcrit refseq. Si overlap -> last exon, tandem, intronique = o/s ou composite
+
+   o Listes de sorties a revoir (+ parametre graphique + plots -> script 12)
+
+
+##--------------------
+## 22-10-14
+##--------------------
+
+   o Pipeline works until peak filtering. The part for the filtering was coded in R instead of bash.
+  
+##--------------------
+## 22-10-14
+##--------------------
+
+   o Write new script for peak filtering
+
+##--------------------
+## 21-10-14
+##--------------------
+   
+   o First step until peak detection is functionnal
+
+##--------------------
+## 20-10-14
+##--------------------
+
+   o Create configuration file
+  
+   o Create main bash script to run the complete pipeline on one sample
+
+   o Create backup folder with all previous scripts
+
+

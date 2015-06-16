@@ -1,0 +1,48 @@
+## Config file for polyAseq pipeline
+
+## PATH
+
+SAMTOOLS_PATH=/bioinfo/local/build/samtools-1.1/bin/
+BEDTOOLS_PATH=/bioinfo/local/build/BEDTools/BEDTools_2.17.0/bin # 2.21 exists but some options are deprecated
+R_PATH=/bioinfo/local/build/R/R-devel/bin
+PYTHON_PATH=/usr/bin
+AWK_PATH=/usr/bin
+
+## DIR
+
+SCRIPTS=./scripts
+LOGS=./logs
+ANNOT_DIR=annotation
+
+## ANNOTATION
+
+BUILD_ANNOT=0
+ORG=mm9
+UCSC_EXPORT=refseq_export_mm9.csv
+POLYA_MOTIF=annotation/polyA_signal.csv
+
+## PEAK DETECTION
+
+MIN_MAPQ=20
+MAX_DIST_MERGE=170
+MIN_NB_READS_PER_PEAK=5
+
+## PEAK FILTERING
+
+NB_STRETCH_POLYA=9
+MISM=1
+NB_STRETCH_CONSECUTIVE=6
+WINSIZE_DOWN=150
+WINSIZE_UP=50
+KEEP_LE_PEAKS=1
+
+## ANNOTATION
+
+MIN_LE_OV=1
+MIN_INTRON_OV=3
+MIN_ANNOT_OV=1
+
+## SAMPLE COMPARISON
+COMBINE_SAMPLE=[9,12,7,8][1,2,7,8][1,2,5,6][3,4,7,8][3,4,5,6][1,2,3,4,5,6,7,8]
+COMPARE_SAMPLE=[0,0,1,1][0,0,1,1][0,0,1,1][0,0,1,1][0,0,1,1][0,0,0,0,1,1,1,1]
+MIN_COUNT_PER_COND=10

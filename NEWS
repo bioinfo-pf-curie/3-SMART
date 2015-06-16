@@ -1,0 +1,42 @@
+***********************************
+CHANGES IN VERSION 0.5.0
+
+NEW FEATURES
+
+   o Integrate differential analysis
+
+   o New parameters in configuration file, names COMPARE_SAMPLES, to define the group for differential analysis
+
+***********************************
+CHANGES IN VERSION 0.4.0
+
+NEW FEATURES
+
+   o Merge multi samples. Add COMBINE_SAMPLE option in configuration file
+
+   o Add sphinx documentation
+
+
+***********************************
+CHANGES IN VERSION 0.3.0
+
+BUG FIXES
+
+   o Fix bug in getFlankingRegions if the region is larger/smaller than the chromosome size
+
+NEW FEATURES
+
+   o Merge multi samples. If -l is used, all samples are combined before annotation
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+   o Change the workflow order. Annotation is performed after combining multiple samples
+ 
+***********************************
+CHANGES IN VERSION 0.2.0
+
+NEW FEATURES
+   
+   o Complete workflow from fastq files to list of filtered peaks
+
+

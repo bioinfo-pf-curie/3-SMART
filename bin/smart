@@ -1,0 +1,115 @@
+#!/bin/bash
+
+## Init
+VERSION="0.5.0"
+dir=$(dirname $0)
+
+NORMAL="\\033[0;39m" 
+RED="\\033[1;31m"
+
+die() {
+    echo -e "$RED""$*""$NORMAL" 1>&2
+    exit 1
+}
+
+## Version
+version(){
+    echo "SMART version $VERSION"
+    exit 1
+}
+
+## Get args
+usage()
+{
+    echo "usage: $0 -c CONFIG [-i INPUT_BAM] [-l INPUT_LIST] -o OUTPUT_DIR"
+}
+
+if [ $# -eq 0 ]; then
+    usage
+    exit
+fi
+
+set -- $(getopt -u -o c:i:l:o:vh -l conf:,input:,input_list:,output:,version,help -- "$@")
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        (-c|--conf) CONF=$2; shift;;
+        (-i|--input) INPUT=$2; shift;;
+        (-l|--input_list) INPUT_LIST=$2; shift;;
+        (-o|--output) OUTPUT=$2; shift;;
+        (-v|--version) version;;
+        (-h|--help) usage;;
+        (--) shift; break;;
+        (-*) die "$0: error - unrecognized option $1" 1>&2;;
+        (*)  break;;
+    esac
+    shift
+done
+
+
+
+if [[ -z ${CONF} || ( -z ${INPUT} && -z ${INPUT_LIST}) || -z ${OUTPUT} ]]; then
+    usage
+    exit
+fi
+
+## Read configuration files
+source ${CONF}
+echo "## SMART pipeline v${VERSION}"
+echo -n "## " & date
+echo "## CONF="${CONF}
+if [[ ! -z ${INPUT_LIST} ]]; then     
+    echo "## INPUT_LIST="${INPUT_LIST}
+else
+    echo "## INPUT="${INPUT}                                                       
+fi
+echo "## OUTPUT="${OUTPUT}
+
+## Ouptut file
+if [ ! -d ${OUTPUT} ]; then
+    mkdir -p ${OUTPUT}
+fi
+
+## Combinaison number
+comb_num=`echo $COMBINE_SAMPLE | ${AWK_PATH}/awk -vRS="]" -vFS="[" '{print $2}' | wc -l`
+comp_num=`echo $COMPARE_SAMPLE | ${AWK_PATH}/awk -vRS="]" -vFS="[" '{print $2}' | wc -l`
+
+if [[ $comb_num != $comp_num && ${COMPARE_SAMPLE} != "" ]]; then
+    echo -e "Error : COMBINE_SAMPLE different from COMPARE_SAMPLE"
+    #exit
+fi
+ 
+## Multiple Input Files
+if [[ ! -z ${INPUT_LIST} ]]; then
+
+    while read line  
+    do  
+	i=`echo $line | awk '{print $2}'`
+    	echo
+	echo "Analysing "$i" file ..."
+	echo
+	out=`basename $i | sed -e 's/.bam$//g'`
+	mkdir -p ${OUTPUT}/${out} || die "Cannot create output folder"
+	${SCRIPTS}/getpeaks.sh -c ${CONF} -i $i -o ${OUTPUT}/${out}
+    done < ${INPUT_LIST}
+   
+    ##Merge all samples following the combine parameters
+
+    for i in $(seq 1 $(($comb_num-1))); do
+	comb=`echo $COMBINE_SAMPLE | awk -v l=$i -vRS="]" -vFS="[" '(NR==l){print $2}'`
+   	echo "Combine samples $comb ..."
+        ## Combine
+	${SCRIPTS}/annot_multisamples.sh -c ${CONF} -s $comb -l ${INPUT_LIST} -o ${OUTPUT}
+	if [[ $COMPARE_SAMPLE != "" ]]; then
+	    echo "Compare sample $comb ..."
+	    group=`echo $COMPARE_SAMPLE | awk -v l=$i -vRS="]" -vFS="[" '(NR==l){print $2}'`
+	    ${SCRIPTS}/compare_samples.sh -c ${CONF} -l ${INPUT_LIST} -s $comb -g $group -o ${OUTPUT} 
+	fi
+    done
+else
+    ##Single input
+    ${SCRIPTS}/getpeaks.sh -c ${CONF} -i ${INPUT} -o ${OUTPUT}            
+    ${SCRIPTS}/annot.sh -c ${CONF} -i ${INPUT} -o ${OUTPUT}
+fi
+
+echo "done !"

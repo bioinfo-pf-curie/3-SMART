@@ -1,0 +1,148 @@
+
+R Under development (unstable) (2015-01-18 r67517) -- "Unsuffered Consequences"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R est un logiciel libre livré sans AUCUNE GARANTIE.
+Vous pouvez le redistribuer sous certaines conditions.
+Tapez 'license()' ou 'licence()' pour plus de détails.
+
+R est un projet collaboratif avec de nombreux contributeurs.
+Tapez 'contributors()' pour plus d'information et
+'citation()' pour la façon de le citer dans les publications.
+
+Tapez 'demo()' pour des démonstrations, 'help()' pour l'aide
+en ligne ou 'help.start()' pour obtenir l'aide au format HTML.
+Tapez 'q()' pour quitter R.
+
+[Sauvegarde de la session précédente restaurée]
+
+> rm(list=ls())
+> 
+> args <- commandArgs(TRUE)
+> la <- length(args)
+> if (la > 0){
++   for (i in 1:la)
++     eval(parse(text=args[[i]]))
++ }
+> 
+> 
+> ###################################################################
+> ##
+> ## Peak filtering - PolyA-seq pipeline
+> ##
+> ###################################################################
+> require(RColorBrewer)
+Le chargement a nécessité le package : RColorBrewer
+> require(GenomicRanges)
+Le chargement a nécessité le package : GenomicRanges
+Le chargement a nécessité le package : BiocGenerics
+Le chargement a nécessité le package : parallel
+
+Attachement du package : ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following object is masked from ‘package:stats’:
+
+    xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, as.vector, cbind, colnames,
+    do.call, duplicated, eval, evalq, Filter, Find, get, intersect,
+    is.unsorted, lapply, Map, mapply, match, mget, order, paste, pmax,
+    pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce, rep.int,
+    rownames, sapply, setdiff, sort, table, tapply, union, unique,
+    unlist, unsplit
+
+Le chargement a nécessité le package : S4Vectors
+Le chargement a nécessité le package : stats4
+Le chargement a nécessité le package : IRanges
+Le chargement a nécessité le package : GenomeInfoDb
+> require(rtracklayer)
+Le chargement a nécessité le package : rtracklayer
+> source("scripts/polyA_lib.R")
+> 
+> 
+> 
+> ## Load Genome
+> message("Load genome info ...")
+Load genome info ...
+> if (org=="mm9"){
++   genomePack <- "BSgenome.Mmusculus.UCSC.mm9"
++ }else if (org=="hg19"){
++   genomePack <- "BSgenome.Hsapiens.UCSC.hg19"
++ }
+> stopifnot(require(genomePack, character.only = TRUE))
+Le chargement a nécessité le package : BSgenome.Mmusculus.UCSC.mm9
+Le chargement a nécessité le package : BSgenome
+Le chargement a nécessité le package : Biostrings
+Le chargement a nécessité le package : XVector
+> genome <- eval(as.name(genomePack))
+> 
+> ## Import peaks as GRanges object
+> message("Import peaks file ...")
+Import peaks file ...
+> rois <- import(peakfile)
+> names(rois) <- rois$name
+> chrname <- seqlevels(rois)
+> if (is.element("chrMT",  chrname)){
++   chrname[which(chrname=="chrMT")] <- "chrM"
++   seqlevels(rois) <- chrname
++ }
+> seqinfo(rois) <- seqinfo(genome)[seqlevels(rois)]
+> message(length(rois)," loaded")
+45446 loaded
+> 
+> 
+> message("Extract flanking regions [",wsizedown,"] ...")
+Extract flanking regions [150] ...
+> fseq <- getFlankingRegions(rois, wdwn=as.numeric(wsizedown), wup=NA, genome)
+> 
+> ## A stretch
+> message("Look for 'A' stretch in downstream regions [",nstretch," - ",mism,"]...")
+Look for 'A' stretch in downstream regions [9 - 1]...
+> rois.stretch <- containsStretch(fseq$dwn, stretch="A", slen=as.numeric(nstretch), mm=as.numeric(mism))
+> message("Discarding ",length(which(rois.stretch==TRUE)), " peaks")
+Discarding 10268 peaks
+> message("Look for 'A' stretch in downstream regions [",nstretchcons," - ",mism,"]...")
+Look for 'A' stretch in downstream regions [6 - 1]...
+> rois.stretch2 <- containsStretch(fseq$dwn, stretch="A", slen=as.numeric(nstretchcons), mm=0)
+> message("Discarding ",length(which(rois.stretch2==TRUE)), " peaks")
+Discarding 10606 peaks
+> 
+> pname <- rois[which(!unlist(rois.stretch) & !unlist(rois.stretch2))]$name
+> 
+> ## Keep LE peaks
+> if (keep_le_peaks == 1){
++   le.gr <- loadAnnotData(LEAnnotFile)
++   is_le <- filterPeaksOnAnnotation(rois, le.gr)$name
++   pname <- union(pname, is_le)
++ }
+Loading annotation file 'annotation/mm9/last_exon_gene.bed' ...
+> 
+> pois <- rois[pname]
+> peak2discard <- rois[setdiff(names(rois), pname)]
+> message("Discarded peaks=",length(peak2discard))
+Discarded peaks=10213
+> 
+> ## Export list of peaks 
+> message("Export results ...")
+Export results ...
+> outfile <- sub(".bed$", "_genomstretch.bed", peakfile)
+> export(peak2discard, format="bed", con=outfile)
+> 
+> outfile <- sub(".bed$", "_filt.bed", peakfile)
+> export(pois, format="bed", con=outfile)
+> 
+> 
+> 
+> 
+> proc.time()
+utilisateur     système      écoulé 
+     23.757      23.341      47.910 
