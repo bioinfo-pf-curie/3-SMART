@@ -1,4 +1,4 @@
-## Nicolas Servant, Aurélie Teissandier, Elodie Girard, Marine Séjourné
+## Nicolas Servant, Aurélie Teissandier, Elodie Girard, Marine Séjourné, Mandy Cadix
 ## PolyA-seq pipeline
 
 
@@ -8,6 +8,11 @@
 ##
 ################################################################################
 
+   o Integration of annotation peaks for no differential condition (annot.sh)
+
+   o Integrate the new getpeaks, annot_multisamples.sh and compare.sh in a bin/smart file
+
+   o Create a tar.gz folder with all files
 
 
 ################################################################################
@@ -15,6 +20,34 @@
 ## LOGBOOK
 ##
 ################################################################################
+
+##--------------------
+## 05-05-17
+##--------------------
+   
+   o Add a Lexogen option; choose this option if your protocol of the library preparation is QuantSeq REV kit
+
+##--------------------
+## 18-01-17
+##--------------------
+   
+   o Add a new option: The peaks for which the percentage of the intronic last exon on the last exon exceeds the indicated threshold are kept
+
+##--------------------
+## 26-08-16
+##--------------------
+   
+   o Update doc
+   o Create a README in markdown format
+
+##--------------------
+## 25-08-16
+##--------------------
+   
+   o Change the workflow order by M. Cadix
+   o Integrate a new steps : cleaning fastq.gz file, trimming, remove A stretch in 3' side and mapping. Create a step option in command line by M. Cadix
+   o Add trimming, mapping, remove duplicated reads option in configuration file
+
 ##--------------------
 ## 25-04-15
 ##--------------------
@@ -32,7 +65,7 @@
 ## 04-03-15
 ##--------------------
 
-  o Pipeline outputs valided by Galina.
+  o Pipeline outputs valided by G. Boldina
 
 ##--------------------
 ## 10-02-15
@@ -55,7 +88,7 @@
 
    o Change in LE overlapping function (at leats one base overlap)
 
-   o Change annotation outputs (see Galina.)
+   o Change annotation outputs
 
 ##--------------------
 ## 08-12-14
@@ -68,27 +101,6 @@
    o Add wrapper to take a list of files as input
 
    o Final peaks filering step
-
-##--------------------
-## 20-11-14
-##--------------------
-Meeting - GB/MD/AT/NS
-
-   o Comparaison de chaque peak avec le dernier exon entier (script 11) ou avec le dernier peaks (script 12)
-
-   o Liste des vrai positifs -> pour valider le model
-
-   o Parameter optimaux : MAX_DIST_MERGE = 170 / MIN_NB_READS_PER_PEAK = 0
-   -> Filtrer les peaks avant DESeq (Somme des replicats > n*5)
-
-   o A ajouter : taille de debordement dans l'intron. On retire les peaks exoniquesqui débordent un peu dans intron - on garde uniquement les LE et les peaks introniques dans au moins un transcripts
-
-   o Ajouter parametre grahique pipeline step2
-
-   o Ajouter classification site qui overlap la fin du transcrit refseq. Si overlap -> last exon, tandem, intronique = o/s ou composite
-
-   o Listes de sorties a revoir (+ parametre graphique + plots -> script 12)
-
 
 ##--------------------
 ## 22-10-14

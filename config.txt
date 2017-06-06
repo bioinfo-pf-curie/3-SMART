@@ -1,34 +1,85 @@
-## Config file for polyAseq pipeline
+## Config file for 3-SMART pipeline
 
-## PATH
 
+#############
+##  PATHS  ##
+#############
+
+CUTADAPT_PATH=/bioinfo/local/build/cutadapt-1.8-2/bin
+BOWTIE2_PATH=/bioinfo/local/build/bowtie2-2.2.5
 SAMTOOLS_PATH=/bioinfo/local/build/samtools-1.1/bin/
-BEDTOOLS_PATH=/bioinfo/local/build/BEDTools/BEDTools_2.17.0/bin # 2.21 exists but some options are deprecated
-R_PATH=/bioinfo/local/build/R/R-devel/bin
-PYTHON_PATH=/usr/bin
+BEDTOOLS_PATH=/bioinfo/local/build/BEDTools/BEDTools_2.17.0/bin 		# 2.21 exists but some options are deprecated
+#R_PATH=/bioinfo/local/build/R/R-3.2.3/bin
+R_PATH=/bioinfo/local/build/Centos/R/R-3.4.0/bin
+PYTHON_PATH=/bioinfo/local/build/python-2.7.9/bin
 AWK_PATH=/usr/bin
+JAVA_PATH=/bioinfo/local/build/Java/jdk1.7.0_45/bin
+PICARD_TOOLS=/bioinfo/local/picard-tools
+FASTQC_PATH=/bioinfo/local/build/FastQC_0.10.1
 
-## DIR
 
-SCRIPTS=./scripts
-LOGS=./logs
-ANNOT_DIR=annotation
 
-## ANNOTATION
+## Please change the variable settings below if necessary
+
+###########
+##  DIR  ##
+###########
+
+SCRIPTS=/myGitHub/3-smart/scripts
+ANNOT_DIR=/myGitHub/3-smart/annotation
+
+
+################
+##  TRIMMING  ##
+################
+
+RD_1_SP="ACACTCTTTCCCTACACG"
+INDEX_SP="TCTGAACTCCAGTCAC"
+MIN_LENGTH_READS=19
+
+
+###############
+##  MAPPING  ##
+###############
+
+RANDOM_HIT=1
+SEED_LENGTH=22
+MAX_MISMATCH_SEED=1
+MIN_MAPQ=20
+BOWTIE2_INDEX=/data/annotations/Human/hg19/bowtie2_indexes/base/hg19
+
+
+###############################
+##  REMOVE DUPLICATED READS  ##
+###############################
+
+REMOVE_DUPLICATES=0
+
+
+##################
+##  ANNOTATION  ##
+##################
 
 BUILD_ANNOT=0
-ORG=mm9
-UCSC_EXPORT=refseq_export_mm9.csv
-POLYA_MOTIF=annotation/polyA_signal.csv
+ORG=hg19
+UCSC_EXPORT=refseq_export_hg19.csv
+POLYA_MOTIF=./annotation/polyA_signal.csv
 
-## PEAK DETECTION
+
+######################
+##  PEAK DETECTION  ##
+######################
 
 MIN_MAPQ=20
-MAX_DIST_MERGE=170
+MAX_DIST_MERGE=50
 MIN_NB_READS_PER_PEAK=5
 
-## PEAK FILTERING
 
+######################
+##  PEAK FILTERING  ##
+######################
+
+LEXOGEN=1
 NB_STRETCH_POLYA=9
 MISM=1
 NB_STRETCH_CONSECUTIVE=6
@@ -36,13 +87,21 @@ WINSIZE_DOWN=150
 WINSIZE_UP=50
 KEEP_LE_PEAKS=1
 
-## ANNOTATION
+
+##################
+##  ANNOTATION  ##
+##################
 
 MIN_LE_OV=1
 MIN_INTRON_OV=3
 MIN_ANNOT_OV=1
 
-## SAMPLE COMPARISON
-COMBINE_SAMPLE=[9,12,7,8][1,2,7,8][1,2,5,6][3,4,7,8][3,4,5,6][1,2,3,4,5,6,7,8]
-COMPARE_SAMPLE=[0,0,1,1][0,0,1,1][0,0,1,1][0,0,1,1][0,0,1,1][0,0,0,0,1,1,1,1]
+
+#########################
+##  SAMPLE COMPARISON  ##
+#########################
+
+COMBINE_SAMPLE=19,23,27,18,22,26
+COMPARE_SAMPLE=1,1,1,0,0,0
 MIN_COUNT_PER_COND=10
+PERCENT_VALUE_RATIO=0
