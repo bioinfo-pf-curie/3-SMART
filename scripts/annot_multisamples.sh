@@ -1,6 +1,23 @@
 #!/bin/bash
 
-## Init
+set -o pipefail  # trace ERR through pipes
+set -o errexit   ## set -e : exit the script if any statement returns a non-true return value
+
+SOFT="3-SMART"
+VERSION="2.0"
+
+################
+##  Function  ##
+
+function evalecho {
+    echo 
+#    echo $1
+    echo
+    eval $1
+}
+################
+
+##  Initialization  ##
 dir=$(dirname $0)
 
 NORMAL="\\033[0;39m" 
@@ -11,10 +28,37 @@ die() {
     exit 1
 }
 
-## Get args
+##  Get args  ##
 usage()
 {
-    echo "usage: $0 -c CONF_FILE -l INPUT_LIST  -s SAMPLES_TO_COMBINE -o OUTPUT_DIR"
+    echo "usage: $0 -c CONF_FILE -l INPUT_LIST -s STEP -o OUTPUT_DIR"
+    echo "Use option -h for more information"
+    exit
+}
+
+help()
+{
+    echo " ***$SOFT  $VERSION ***"
+    echo
+    echo "OPTIONS"
+    echo "    -c CONFIG : configuration file for 3-SMART processing"
+    echo "    -l LIST : input list file; 3 columns with the sample id, path and condition of samples to compare"
+    echo "    -s STEP : run all or only a subset of the $SOFT workflow"
+    echo "	  all : run all workflow"
+    echo "	  merge_peaks : Concatenation of all peak files (3-SMART data)"
+    echo " 	  annotate_peaks : Annotate peaks - Annotation based on Gene level"
+    echo " 	  peaks_description : Create pictures with motifs and peaks"
+    echo "    -o OUTPUT : output folder"
+    echo "    [-h] : help"
+    echo "    [-v] : version"
+    exit
+
+}
+
+version()
+{
+    echo "$SOFT version $VERSION"
+    exit
 }
 
 if [ $# -eq 0 ]; then
@@ -27,9 +71,10 @@ do
     case "$1" in
 	(-c) CONF_FILE=$2; shift;;
 	(-l) INPUT_LIST=$2; shift;;
-	(-s) COMB=$2; shift;;
+	(-s) STEP=$2; shift;;
 	(-o) OUTPUT=$2; shift;;
-	(-h) usage;;
+	(-h) help;;
+	(-v) version;;
 	(--) shift; break;;
 	(-*) die "$0: error - unrecognized option $1" 1>&2;;
 	(*)  break;;
@@ -38,86 +83,112 @@ do
 done
 
 
-if [[ -z ${CONF_FILE} || -z ${INPUT_LIST} || -z ${OUTPUT} ]]; then
+if [[ -z ${CONF_FILE} || -z ${INPUT_LIST} || -z ${STEP} || -z ${OUTPUT} ]]; then
     usage
     exit
 fi
 
-## Read configuration files
+##  Read configuration files  ##
 source ${CONF_FILE}
 
-## ANNOTATION
-if [ $BUILD_ANNOT == 1 ]
-then
-    echo "Build annotation files ..."             
-    ## Create gene file
-    echo "${R_PATH}/R --vanilla CMD BATCH \"--args txFile='${ANNOT_DIR}/${ORG}/${UCSC_EXPORT}' out='${ANNOT_DIR}/${ORG}'\" ${SCRIPTS}/make_annot_gene.R ${LOGS}/make_annot_gene.Rout"
-    ${R_PATH}/R --vanilla CMD BATCH "--args txfile='${ANNOT_DIR}/${ORG}/${UCSC_EXPORT}' out='${ANNOT_DIR}/${ORG}'" ${SCRIPTS}/make_annot_gene.R ${LOGS}/make_annot_gene.Rout
-    ## Create exon file
-    echo "${R_PATH}/R --vanilla CMD BATCH \"--args txfile='${ANNOT_DIR}/${ORG}/${UCSC_EXPORT}' lefile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' out='${ANNOT_DIR}/${ORG}'\" ${SCRIPTS}/make_annot_exon.R ${LOGS}/make_annot_exon.Rout"
-    ${R_PATH}/R --vanilla CMD BATCH "--args txfile='${ANNOT_DIR}/${ORG}/${UCSC_EXPORT}' lefile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' out='${ANNOT_DIR}/${ORG}'" ${SCRIPTS}/make_annot_exon.R ${LOGS}/make_annot_exon.Rout
-fi 
-
-if [[ ! -e ${ANNOT_DIR}/${ORG}/last_exon_gene.bed || ! -e ${ANNOT_DIR}/${ORG}/whole_gene.bed || ! -e ${ANNOT_DIR}/${ORG}/whole_gene_wo_last_exon.bed || ! -e ${ANNOT_DIR}/${ORG}/transcriptsType.bed ]]
-then
-    die "Error in annotation process"
-fi
-
-## Ouptut directory from per sample analysis
+##  Ouptut directory from per sample analysis  ##
 if [ ! -d ${OUTPUT} ]; then
     echo "${OUTPUT} directory not found"
     exit
 fi
 
-## Read sample plan and put it in a hash table
-declare -A SAMPLES
-while read line  
-do  
-    id=`echo $line | ${AWK_PATH}/awk '{print $1}'`
-    f=`echo $line | ${AWK_PATH}/awk '{print $2}'`
-    SAMPLES[${id}]="${f}"
-done < ${INPUT_LIST}
-
-
-## For all combinaison
-## Output for all samples comparison
-odir=`echo $COMB | tr "," "_"`
+##  For all combinaison  ##
+##  Output for all samples comparison  ##
+odir=`echo ${COMBINE_SAMPLE} | tr "," "_"`
 OUTPUT_ALL=${OUTPUT}/${odir}
 mkdir -p ${OUTPUT_ALL} || die "Cannot create output folder"
 if [ -e ${OUTPUT_ALL}/merged_peaks.bed ]; then
     rm ${OUTPUT_ALL}/merged_peaks.bed
 fi
-    
-for i in `echo $COMB | tr "," " "`
-do  
-    fn=${SAMPLES["$i"]}
-    echo -e "--$fn--"
-    dname=`basename $fn | sed -e 's/.bam//'`
-    input=${OUTPUT}/$dname/*_filt.bed
-    cat $input >> ${OUTPUT_ALL}/all_peaks.bed
+
+##  Read sample plan and put it in a hash table  ##
+declare -A SAMPLES
+declare -A SAMPLES_NAME
+while read line
+do 
+	id=`echo ${line} | ${AWK_PATH}/awk '{print $1}'`
+	f=`echo ${line} | ${AWK_PATH}/awk '{print $2}'`
+	n=`echo ${line} | ${AWK_PATH}/awk '{print $3}'`
+	SAMPLES[${id}]="${f}"
+	SAMPLES_NAME[${id}]="${n}"
+done < ${INPUT_LIST}
+
+##  STEP option  ##
+for i in `echo ${STEP} | tr "," " " `
+do
+    NAME_STEP=${i}
+
+##  logs folder  ##
+    LOGS=${OUTPUT_ALL}/logs
+    if [ ! -d ${LOGS} ]; then
+	mkdir -p ${LOGS}
+    fi
+
+
+##  Print sample names to combine  ##
+    echo "Combine samples: ${COMBINE_SAMPLE}"
+
+########################################################
+###  Concatenation of all peak files (3-SMART data)  ###
+########################################################
+
+## Concatenation of filtered peaks from different samples. After that, we decided to merge the overlapping peaks.
+
+    if [[ ${NAME_STEP} == "merge_peaks" || ${NAME_STEP} == "all" ]]; then
+	echo "Concatenate filtered peak files ..."
+	if [ -e ${OUTPUT_ALL}/all_peaks.bed ]; then
+	    rm ${OUTPUT_ALL}/all_peaks.bed
+	fi
+	for i in `echo ${COMBINE_SAMPLE} | tr "," " "`
+	do
+	    fn=${SAMPLES["${i}"]}
+	    input="${fn}"
+	    cat ${input} >> ${OUTPUT_ALL}/all_peaks.bed
+	done
+
+	name=`echo ${COMBINE_SAMPLE} | tr "," " "`
+	if [ ! -f ${OUTPUT_ALL}/all_peaks.bed ]; then
+	    die " error: the all_peaks.bed file doesn't exist" 1>&2
+        fi
+	echo "Merge Peaks ..."
+        cmd="${BEDTOOLS_PATH}/sortBed -i ${OUTPUT_ALL}/all_peaks.bed | ${BEDTOOLS_PATH}/bedtools merge -s -n -i - | ${AWK_PATH}/awk 'BEGIN{OFS=\"\t\";c=1}{print \$1,\$2,\$3,\"mpeak_\"c,\$4,\$5;c=c+1}' > ${OUTPUT_ALL}/merged_peaks.bed"
+        evalecho "$cmd"
+    fi
+
+#########################################################
+###  Annotate peaks - Annotation based on Gene level  ###
+#########################################################
+
+## Annotation of the merged peaks
+
+    if [[ ${NAME_STEP} == "annotate_peaks" || ${NAME_STEP} == "all" ]]; then
+        if [ ! -f ${OUTPUT_ALL}/merged_peaks.bed ]; then
+	    die " error: the merged_peaks.bed file doesn't exist" 1>&2
+        fi
+        echo "Annotate peaks ..."
+        cmd="${R_PATH}/R CMD BATCH \"--args peakfile='${OUTPUT_ALL}/merged_peaks.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' LEAnnotFile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' ELEAnnotFile='${ANNOT_DIR}/${ORG}/whole_gene_wo_last_exon.bed' TRSAnnotFile='${ANNOT_DIR}/${ORG}/transcriptsType.bed'  le_overlap='${MIN_LE_OV}' intron_overlap='${MIN_INTRON_OV}' minover='${MIN_ANNOT_OV}'\" ${SCRIPTS}/annot_peaks.R ${LOGS}/annot_peaks.Rout"
+        evalecho "$cmd"
+    fi
+
+###########################
+###  Peaks description  ###
+###########################
+
+## Creation of pictures and table about the merged peaks
+
+    if [[ ${NAME_STEP} == "peaks_description" || ${NAME_STEP} == "all" ]]; then
+        if [ ! -f ${OUTPUT_ALL}/merged_peaks_finallist.bed ]; then
+	    die " error: the merged_peaks_finallist.bed file doesn't exist" 1>&2
+        fi
+	echo "Peaks description ..."
+	cmd="${R_PATH}/R CMD BATCH \"--args org='${ORG}' peakfile='${OUTPUT_ALL}/merged_peaks_finallist.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' polyAfile='${POLYA_MOTIF}' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN}'\" ${SCRIPTS}/peaks_descriptor.R ${LOGS}/peaks_descriptor.Rout"
+	evalecho "$cmd"
+    fi
+
 done
-
-${BEDTOOLS_PATH}/sortBed -i ${OUTPUT_ALL}/all_peaks.bed | ${BEDTOOLS_PATH}/bedtools merge -s -n -i - | ${AWK_PATH}/awk  'BEGIN{OFS="\t";c=1}{print $1,$2,$3,"mpeak_"c,$4,$5;c=c+1}' >> ${OUTPUT_ALL}/merged_peaks.bed
-rm ${OUTPUT_ALL}/all_peaks.bed
-
-## Annotate peaks - Annotation based on Gene level
-echo "Annotate peaks ..."
-cmd="${R_PATH}/R --vanilla CMD BATCH \"--args peakfile='${OUTPUT_ALL}/merged_peaks.bed' LEAnnotFile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' ELEAnnotFile='${ANNOT_DIR}/${ORG}/whole_gene_wo_last_exon.bed' TRSAnnotFile='${ANNOT_DIR}/${ORG}/transcriptsType.bed'  le_overlap='${MIN_LE_OV}' intron_overlap='${MIN_INTRON_OV}' minover='${MIN_ANNOT_OV}'\" ${SCRIPTS}/annot_peaks.R ${LOGS}/annot_peaks.Rout"
-echo $cmd
-eval $cmd
-
-ANNO_PEAKS=`echo merged_peaks.bed | sed -e 's/.bed$/_NM_ELE_annot.bed/'`
-if [[ ! -e ${OUTPUT_ALL}/${ANNO_PEAKS} ]]; then
-    die "Error : Annotated peaks file not found"
-fi
-
-## Annotate peaks - Annotation based on Gene level
-echo "Peaks description ..."
-cmd="${R_PATH}/R --vanilla CMD BATCH \"--args org='${ORG}' peakfile='${OUTPUT_ALL}/merged_peaks_finallist.bed' polyAfile='${POLYA_MOTIF}'  wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN}'\" ${SCRIPTS}/peaks_descriptor.R ${LOGS}/peaks_descriptor.Rout"
-echo $cmd
-eval $cmd
-
-
-
-
 
