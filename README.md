@@ -160,3 +160,4 @@ This is a input list of BAM files obtained thanks to the PART 1, for the PART 3,
     Sample1        path/Sample1/Sample1_ctrl_MAPQ_sort.bam        Ctrl
     Sample3        path/Sample3/Sample3_ctrl_MAPQ_sort.bam        Ctrl
 
+
