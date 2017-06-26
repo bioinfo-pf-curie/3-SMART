@@ -9,7 +9,7 @@ What is the 3-SMART pipeline ?
 -------------------------------
 
 3-SMART (3'-Seq Mapping Annotation and Regulation Tool) was setup to process 3' sequencing data from sequencing reads.
-It includes the trimming, mapping, peak detection, filtering, and annotation.
+It includes the trimming, mapping, peak detection, filtering, annotation and differential analysis.
 
 Contact
 -------
@@ -21,7 +21,7 @@ How to install it ?
 
 The following dependencies are required :
 
-* [R] (https://www.r-project.org/) (version 3.4.0) with the *RColorBrewer*, *ggplot2*, *rtracklayer*, *DESeq2*, *magrittr*, *dplyr*, *gplots*, *plyr* and *GenomicRanges* packages
+* [R] (https://www.r-project.org/) (version 3.2.3) with the *RColorBrewer*, *ggplot2*, *rtracklayer*, *DESeq2*, *magrittr*, *dplyr*, *gplots*, *plyr* and *GenomicRanges* packages
 
 * [Samtools] (http://samtools.sourceforge.net) (version 1.1)
 
@@ -42,7 +42,8 @@ The following dependencies are required :
 
 To install the 3-SMART pipeline, simply extract the archive and set up the configuration file with the paths to dependencies.
 
-    TO DO
+    unzip 3-SMART-2.0.zip
+    cd 3-SMART-2.0
 
 
 Annotation Files
