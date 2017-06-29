@@ -84,22 +84,20 @@ res_files <- lapply(unique(refseq_polyA[,"gene"]), function(gene) {
 proc.time() - pc
 
 res_files_new <- matrix(unlist(sapply(res_files, "[",1)), ncol = 6, byrow = TRUE)
-#change the name like : chr_name_NM_strand
-name_res_files <- paste(res_files_new[,1], res_files_new[,4], res_files_new[,6], sep = "_")
+#change the name like : chr_start_end_name_NM_strand
+name_res_files<- paste(res_files_new[,1],res_files_new[,2],res_files_new[,3],res_files_new[,4],res_files_new[,6], sep="_")
 res_files_new_a <- data.frame(res_files_new[,1], res_files_new[,2], res_files_new[,3], name_res_files, res_files_new[,5], res_files_new[,6])
 write.table(res_files_new_a, paste(out_dir, "whole_gene.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 
 res_last_exon <- matrix(unlist(sapply(res_files, "[",2)), ncol = 6, byrow = TRUE)
-#change the name like : chr_name_NM_strand_NM_ExonNumber
-#splitCol <- matrix(unlist(strsplit(res_last_exon[,4],"_")), ncol=3, byrow=T)
-#name_res_last_exon<- paste(res_last_exon[,1],splitCol[,1],splitCol[,2],res_last_exon[,6],splitCol[,2],splitCol[,3], sep="_")
-name_res_last_exon <- paste(res_last_exon[,1], res_last_exon[,4], res_last_exon[,6], sep = "_")
+#change the name like : chr_start_end_name_ExonNumber_NM_strand
+name_res_last_exon<- paste(res_last_exon[,1],res_last_exon[,2],res_last_exon[,3],res_last_exon[,4],res_last_exon[,6], sep="_")
 res_last_exon_a <- data.frame(res_last_exon[,1], res_last_exon[,2], res_last_exon[,3], name_res_last_exon, res_last_exon[,5], res_last_exon[,6])
 write.table(res_last_exon_a, paste(out_dir, "last_exon_gene.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 
 res_files_wgwole <- matrix(unlist(sapply(res_files, "[",3)), ncol = 6, byrow = TRUE)
-#change the name like : chr_name_NM_strand
-name_res_wgwole <- paste(res_files_wgwole[,1], res_files_wgwole[,4], res_files_wgwole[,6], sep = "_")
+#change the name like : chr_start_end_name_NM_strand
+name_res_wgwole<- paste(res_files_wgwole[,1],res_files_wgwole[,2],res_files_wgwole[,3],res_files_wgwole[,4],res_files_wgwole[,6], sep="_")
 res_files_wgwole_a <- data.frame(res_files_wgwole[,1],res_files_wgwole[,2],res_files_wgwole[,3],name_res_wgwole,res_files_wgwole[,5], res_files_wgwole[,6])
 write.table(res_files_wgwole_a, paste(out_dir, "whole_gene_wo_last_exon.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 
