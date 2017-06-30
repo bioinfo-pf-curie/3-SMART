@@ -91,8 +91,8 @@ write.table(res_files_new_a, paste(out_dir, "whole_gene.bed", sep = "/"), quote 
 
 res_last_exon <- matrix(unlist(sapply(res_files, "[",2)), ncol = 6, byrow = TRUE)
 #change the name like : chr_start_end_name_ExonNumber_NM_strand
-name_res_last_exon<- paste(res_last_exon[,1],res_last_exon[,2],res_last_exon[,3],res_last_exon[,4],res_last_exon[,6], sep="_")
-res_last_exon_a <- data.frame(res_last_exon[,1], res_last_exon[,2], res_last_exon[,3], name_res_last_exon, res_last_exon[,5], res_last_exon[,6])
+#name_res_last_exon<- paste(res_last_exon[,1],res_last_exon[,2],res_last_exon[,3],res_last_exon[,4],res_last_exon[,6], sep="_")
+res_last_exon_a <- data.frame(res_last_exon[,1], res_last_exon[,2], res_last_exon[,3], name_res_files, res_last_exon[,5], res_last_exon[,6])
 write.table(res_last_exon_a, paste(out_dir, "last_exon_gene.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 
 res_files_wgwole <- matrix(unlist(sapply(res_files, "[",3)), ncol = 6, byrow = TRUE)
