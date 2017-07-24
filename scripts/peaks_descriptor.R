@@ -25,6 +25,8 @@ source(polyA_lib)
 message("Load genome info ...")
 if (org=="mm9"){
   genomePack <- "BSgenome.Mmusculus.UCSC.mm9"
+}else if (org=="mm10"){
+  genomePack <- "BSgenome.Mmusculus.UCSC.mm10"
 }else if (org=="hg19"){
   genomePack <- "BSgenome.Hsapiens.UCSC.hg19"
 }
