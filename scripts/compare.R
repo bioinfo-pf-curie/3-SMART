@@ -103,8 +103,8 @@ colnames(resO)[6 + c(1:ncol(myData))] <- colnames(myData)
 
 ## Create a complete final file
 resOTot <- cbind(resO,"logFC_intro-logFC_LE" = (resO[,"logFC_intro"] - resO[,"logFC_LE"]))
-splitNames <- str_split_fixed(rownames(resOTot),"_",5)
-resOFinal <- cbind(resOTot,"gene" = splitNames[,3])
+splitNames <- str_split_fixed(rownames(resOTot),"_",7)
+resOFinal <- cbind(resOTot,"gene" = splitNames[,5])
 outfile <- sub(".bed", "_peakIntron_SumLE.res", peakfile)
 write.table(resOFinal, file = outfile, col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
 
