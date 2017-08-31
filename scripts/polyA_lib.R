@@ -139,13 +139,13 @@ loadAnnotData <- function(con, random = FALSE) {
 ## annot = Genomic ranges of exon description
 ## invert = invert annotation, i.e intronic regions
 ##
-filterPeaksOnAnnotation <- function(x, annot, invert = FALSE, ...){##, extend=5){
+filterPeaksOnAnnotation <- function(x, annot, invert = FALSE, ...){
 
   if (invert) {
     message("Invert Annotation ...")
     grl <- split(annot, annot$symbol)
     geneRanges <- range(grl)
-    annot <- unlist(psetdiff(geneRanges, grl))
+    annot <- unlist(setdiff(geneRanges, grl))
   }
   
   ## Select peaks on annotation

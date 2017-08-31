@@ -146,7 +146,6 @@ do
 ## remove_stretchA step permits to remove the A stretch (with a minimum of 3 A in 3' side) and select reads with a minimum of nucleotides (${MIN_LENGTH_READS})
 
     OUTPUT_STRETCH=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_TRIMMING} | sed -e 's/_trimming_filter.fastq$/_remove_stretchA.fastq/'`
-#    OUTPUT_FILTER=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_STRETCH} | sed -e 's/_remove_stretchA.fastq$/_size_filter.fastq/'`
     if [[ ${NAME_STEP} == "remove_stretchA" || ${NAME_STEP} == "all" ]]; then
 ## File verification
 	if [ ! -f ${OUTPUT_TRIMMING} ]; then
@@ -155,13 +154,6 @@ do
 	echo "Remove A stretch in 3' side..."
 	cmd="${PYTHON_PATH}/python ${SCRIPTS}/removeStretchPolyA.py -input ${OUTPUT_TRIMMING} -output ${OUTPUT_STRETCH} -length ${MIN_LENGTH_READS}"
 	evalecho "$cmd"
-
-#	if [ ! -f ${OUTPUT_STRETCH} ]; then
-#	    die " error: the *_remove_stretchA.fastq file doesn't exist" 1>&2
-#	fi
-#	echo "Choose reads with at least ${MIN_LENGTH_READS} nucleotides..."
-#        cmd="${AWK_PATH}/awk -v MIN_LENGTH_READS=${MIN_LENGTH_READS} 'BEGIN{OFS=\"\n\"}{header=\$0;getline seq; getline qheader; getline qseq; if (length(seq)>=MIN_LENGTH_READS){print header,seq,qheader,qseq}}' ${OUTPUT_STRETCH} > ${OUTPUT_FILTER}"
-#	evalecho "$cmd"
     fi
 
 ################
@@ -182,8 +174,7 @@ do
 
 ## In this step, we use Bowtie2 as mapper. We decided to apply the MAPQ and after that, sort and index this file.
 
-    OUTPUT_MAPQ=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_STRETCH} | sed -e 's/_remove_stretchA.fastq$/_MAPQ.bam/'`
-    OUTPUT_SORT=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_MAPQ} | sed -e 's/.bam$/_sort.bam/'`
+    OUTPUT_SORT=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_STRETCH} | sed -e 's/_remove_stretchA.fastq$/_MAPQ_sort.bam/'`
 
     if [[ ${NAME_STEP} == "mapping" || ${NAME_STEP} == "all" ]]; then
 	if [ ! -f ${OUTPUT_STRETCH} ]; then
@@ -196,17 +187,14 @@ do
 	fi
 	echo "Mapping with Bowtie2 ..."
 	cmd="${BOWTIE2_PATH}/bowtie2 -x ${BOWTIE2_INDEX} -q ${OUTPUT_STRETCH} -N ${MAX_MISMATCH_SEED} -L ${SEED_LENGTH} -k ${RANDOM_HIT} -S ${MAPPING}/accepted_hits.sam"
-	#cmd="${BOWTIE2_PATH}/bowtie2 -x ${BOWTIE2_INDEX} -q ${OUTPUT_STRETCH} -N ${MAX_MISMATCH_SEED} -L ${SEED_LENGTH} -S ${MAPPING}/accepted_hits.sam"
 	evalecho "$cmd"
 
 	if [ ! -f ${MAPPING}/accepted_hits.sam ]; then
 	    die " error: the accepted_hits.sam file in mapping_Bowtie2 folder doesn't exist" 1>&2
 	fi
 	echo "Mapping Quality >= ${MIN_MAPQ} ..."
-	cmd="${SAMTOOLS_PATH}/samtools view -b -o ${OUTPUT_MAPQ} -q ${MIN_MAPQ} ${MAPPING}/accepted_hits.sam"
-	evalecho "$cmd"
 	echo "Sorting ..."
-	cmd="${SAMTOOLS_PATH}/samtools sort -O bam -T prefix.bam ${OUTPUT_MAPQ} -o ${OUTPUT_SORT}"
+	cmd="${SAMTOOLS_PATH}/samtools view -b -q ${MIN_MAPQ} ${MAPPING}/accepted_hits.sam | ${SAMTOOLS_PATH}/samtools sort -O bam -T prefix.bam - -o ${OUTPUT_SORT}"
 	evalecho "$cmd"
 	cmd="${SAMTOOLS_PATH}/samtools index ${OUTPUT_SORT}"
 	evalecho "$cmd"
@@ -218,11 +206,11 @@ do
 
 ## duplicate_reads step permits to remove OR mark duplicated reads. (Duplicated read is a reads with the same sequence and the same length)
 
-    OUTPUT_RM_DUPLICATED_READS=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_SORT} | sed -e 's/_sort.bam$/_rm_duplicated_reads.bam/'`
+    OUTPUT_RM_DUPLICATED_READS=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_SORT} | sed -e 's/_MAPQ_sort.bam$/_rm_duplicated_reads.bam/'`
 
     if [[ ${NAME_STEP} == "duplicate_reads" || ${NAME_STEP} == "all" ]]; then
 	if [ ! -f ${OUTPUT_SORT} ]; then
-	    die " error: the *_sort.bam file doesn't exist" 1>&2
+	    die " error: the *_MAPQ_sort.bam file doesn't exist" 1>&2
 	fi
 	if [ "${REMOVE_DUPLICATES}" = 1 ]; then
 	    echo "Remove Duplicated reads ..."
@@ -245,11 +233,11 @@ do
 
     if [[ ${NAME_STEP} == "peak_calling" || ${NAME_STEP} == "all" ]]; then
 	if [ ! -f ${OUTPUT_SORT} ]; then
-	    die " error: the *_sort.bam file doesn't exist" 1>&2
+	    die " error: the *_MAPQ_sort.bam file doesn't exist" 1>&2
 	fi
 	echo "Get Peaks ..."
         echo "Peak Detection ..."
-        cmd="${BEDTOOLS_PATH}/bedtools bamtobed -i  ${OUTPUT_SORT} | ${BEDTOOLS_PATH}/bedtools merge -s -n -d ${MAX_DIST_MERGE} -i stdin | ${AWK_PATH}/awk -v thr=\${MIN_NB_READS_PER_PEAK} 'BEGIN{OFS=\"\t\";c=1}(\$4>=thr){print \$1,\$2,\$3,\"peak_\"c,\$4,\$5;c=c+1}' > ${OUTPUT_PEAKS}"
+        cmd="${BEDTOOLS_PATH}/bedtools bamtobed -i  ${OUTPUT_SORT} | ${BEDTOOLS_PATH}/bedtools merge -s -d ${MAX_DIST_MERGE} -c 4 -o count -i stdin | ${AWK_PATH}/awk -v thr=\${MIN_NB_READS_PER_PEAK} 'BEGIN{OFS=\"\t\";c=1}(\$5>=thr){print \$1,\$2,\$3,\"peak_\"c,\$5,\$4;c=c+1}' > ${OUTPUT_PEAKS}"
 	evalecho "$cmd"
     fi
 
@@ -276,15 +264,8 @@ do
 
     if [[ ${NAME_STEP} == "filter_peaks" || ${NAME_STEP} == "all" ]]; then
         echo "Filter peaks ..."
-	if [[ ${LEXOGEN} == 1 ]]; then
-		echo "You have chosen Lexogen option, so your protocol of the library preparation is QuantSeq REV kit."
-        	cmd="${R_PATH}/R CMD BATCH \"--args peakfile='${OUTPUT_PEAKS}' keep_le_peaks='${KEEP_LE_PEAKS}' polyA_lib='${SCRIPTS}/polyA_lib.R' LEAnnotFile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN}' nstretch='${NB_STRETCH_POLYA}' mism='${MISM}' nstretchcons='${NB_STRETCH_CONSECUTIVE}' lexogen='${LEXOGEN}' org='${ORG}'\" ${SCRIPTS}/peaks_filter.R ${LOGS}/peaks_filter.Rout"
-        	evalecho "$cmd"
-	else
-		echo "Your protocol of the library preparation is smart, so you didn't choose the lexogen option."
-		cmd="${R_PATH}/R CMD BATCH \"--args peakfile='${OUTPUT_PEAKS}' keep_le_peaks='${KEEP_LE_PEAKS}' polyA_lib='${SCRIPTS}/polyA_lib.R' LEAnnotFile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN}' nstretch='${NB_STRETCH_POLYA}' mism='${MISM}' nstretchcons='${NB_STRETCH_CONSECUTIVE}' lexogen='${LEXOGEN}' org='${ORG}'\" ${SCRIPTS}/peaks_filter.R ${LOGS}/peaks_filter.Rout"
-        	evalecho "$cmd"
-	fi
+        cmd="${R_PATH}/R CMD BATCH \"--args peakfile='${OUTPUT_PEAKS}' keep_le_peaks='${KEEP_LE_PEAKS}' polyA_lib='${SCRIPTS}/polyA_lib.R' LEAnnotFile='${ANNOT_DIR}/${ORG}/last_exon_gene.bed' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN}' nstretch='${NB_STRETCH_POLYA}' mism='${MISM}' nstretchcons='${NB_STRETCH_CONSECUTIVE}' lexogen='${LEXOGEN}' org='${ORG}'\" ${SCRIPTS}/peaks_filter.R ${LOGS}/peaks_filter.Rout"
+        evalecho "$cmd"
 
         if [[ ! -e ${OUTPUT_FILT_PEAKS} ]]; then
             die "error : the *_peaks_filt.bed file doesn't exist"

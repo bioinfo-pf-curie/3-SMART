@@ -3,7 +3,6 @@
 
 import argparse
 import gzip
-#import bz2
 
 parser = argparse.ArgumentParser(description = 'SCRIPT TO SELECT THE SEQUENCES WITHOUT PROBLEM OF SEQUENCING')
 
@@ -15,20 +14,20 @@ args = parser.parse_args()
 input_file = args.input
 output_file = args.output
 
-input_file=gzip.open(input_file,'rb')
-#input_file=bz2.BZ2File(input_file,'rb')
 
-#input_file = open(input_file, 'rb')
+input_file=gzip.open(input_file,'rb')
 output_file = open(output_file, 'w')
 
 
 flag = 0
 y_counter = 0
+n_counter = 0
 
 for line in input_file:	
 
 	if (" " in line) and (":N:" in line):
 		flag = 1
+		n_counter += 1
 
 	if (" " in line) and (":Y:" in line):
 		flag = 0
@@ -37,19 +36,9 @@ for line in input_file:
 	if flag == 1:
 		output_file.write(line)
 
-print "Discard ", y_counter, "reads"
+print "total reads", "\t", "reads discarded", "\n", n_counter + y_counter, "\t", y_counter 
 
 input_file.close()
 output_file.close()
-
-
-## import pysam
-## for read in samfile.fetch(XXX){
-## read
-## read.tag
-## read.pos
-## read.strand
-## read.is_mapped ?
-##}
 
 

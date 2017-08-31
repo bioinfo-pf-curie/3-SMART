@@ -26,6 +26,8 @@ if (org == "mm9") {
   genomePack <- "BSgenome.Mmusculus.UCSC.mm9"
 }else if (org == "hg19") {
   genomePack <- "BSgenome.Hsapiens.UCSC.hg19"
+}else if (org == "mm10") {
+  genomePack <- "BSgenome.Mmusculus.UCSC.mm10"
 }
 stopifnot(require(genomePack, character.only = TRUE))
 genome <- eval(as.name(genomePack))
@@ -34,9 +36,10 @@ genome <- eval(as.name(genomePack))
 message("Import peaks file ...")
 rois <- import(peakfile)
 
-## For Lexogen - Library QuantSeq REV kit - 
+## For Lexogen - library QuantSeq REV - kit
 if (lexogen == 1) {
   rois <- invertStrand(rois)
+  print("You choose Lexogen (library QuantSeq REV) kit.")
 }
 
 names(rois) <- rois$name

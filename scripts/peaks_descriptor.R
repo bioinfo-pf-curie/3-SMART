@@ -124,7 +124,7 @@ ggplot(z, aes(x=nb, y=counts, fill=win)) + geom_bar(stat="identity", position="d
   theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.position="bottom")
 dev.off()
 
-## Purcentage peaks with or without motifs
+## Percentage peaks with or without motifs
 
 mnp <- np[as.character(0:1)]
 names(mnp) <- as.character(0:1)
@@ -152,6 +152,36 @@ outfile <- sub(".bed$", "_WithOrWithout_polyA_ppeak.pdf", peakfile)
 pdf(file=outfile)
 ggplot(z, aes(x=nb, y=counts, fill=win)) + geom_bar(stat="identity", position="dodge") + ylab("Peaks Percentage") + xlab("Motifs Per Peak") + scale_fill_manual(values=c("grey50", "firebrick4","lightsteelblue3","seagreen4"), name="")+
   theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.position="bottom")
+dev.off()
+
+
+##Percentage of peaks with at least AATAAA or/and ATTAAA motifs
+
+pAATAAA <- pap[which(pap[,"AATAAA"] != 0),]
+pATTAAA <- pap[which(pap[,"ATTAAA"] != 0),]
+pAATAAApATTAAA <- pap[which(pap[,"AATAAA"] != 0 | pap[,"ATTAAA"] != 0),]
+
+upAATAAA <- paup[which(paup[,"AATAAA"] != 0),]
+upATTAAA <- paup[which(paup[,"ATTAAA"] != 0),]
+upAATAAAupATTAAA <- paup[which(paup[,"AATAAA"] !=0 | paup[,"ATTAAA"] != 0),]
+
+dwAATAAA <- padw[which(padw[,"AATAAA"] != 0),]
+dwATTAAA <- padw[which(padw[,"ATTAAA"] != 0),]
+dwAATAAAdwATTAAA <- padw[which(padw[,"AATAAA"] !=0 | padw[,"ATTAAA"] != 0),]
+
+updwAATAAA <- paupdw[which(paupdw[,"AATAAA"] !=0 ),]
+updwATTAAA <- paupdw[which(paupdw[,"ATTAAA"] !=0 ),]
+updwAATAAAupdwATTAAA <- paupdw[which(paupdw[,"AATAAA"] !=0 | paupdw[,"ATTAAA"] != 0),]
+
+dataT <- data.frame(motif=c("AATAAA","ATTAAA"), purcentage=c(nrow(upAATAAA)/nrow(paup)*100, nrow(upATTAAA)/nrow(paup)*100, nrow(dwAATAAA)/nrow(padw)*100, nrow(dwATTAAA)/nrow(padw)*100, nrow(pAATAAA)/nrow(pap)*100, nrow(pATTAAA)/nrow(pap)*100, nrow(updwAATAAA)/nrow(paupdw)*100, nrow(updwATTAAA)/nrow(paupdw)*100), win=c(rep("Upstream", 2),rep("Downstream", 2),rep("Peak", 2),rep("Upstream-Downstream", 2)))
+
+dataB <- data.frame(motif="AATAAA or/and ATTAAA", purcentage=c(nrow(upAATAAAupATTAAA)/nrow(paup)*100, nrow(dwAATAAAdwATTAAA)/nrow(padw)*100, nrow(pAATAAApATTAAA)/nrow(pap)*100, nrow(updwAATAAAupdwATTAAA)/nrow(paupdw)*100), win=c("Upstream","Downstream","Peak","Upstream-Downstream"))
+
+outfile <- sub(".bed$", "_AATAAA-ATTAAA_ppeak.pdf", peakfile)
+pdf(file=outfile)
+ggplot(dataT, aes(x=motif, y=purcentage, fill=win)) + geom_bar(stat="identity", position="dodge") + ylab("Peaks Percentage") + xlab("Motifs") + scale_fill_manual(values=c("grey50", "firebrick4","lightsteelblue3","seagreen4"), name="")+
+  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.position="bottom")
+ggplot(dataB, aes(x=motif, y=purcentage, fill=win)) + geom_bar(stat="identity", position="dodge") + ylab("Peaks Percentage") + xlab("Motifs") + scale_fill_manual(values=c("grey50", "firebrick4","lightsteelblue3","seagreen4"), name="")+ theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.position="bottom")
 dev.off()
 
 

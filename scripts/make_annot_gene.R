@@ -9,10 +9,6 @@ for (i in 1:la)
 eval(parse(text = args[[i]]))
 }
 
-#args <- commandArgs(TRUE)
-#infile <- args[1] ; stopifnot(!is.na(infile))
-#out_dir<-ifelse(is.na(args[2]),dirname(infile),args[2]) 
-
 refseq <- read.table(infile, header = TRUE, comment.char = "~", check.names = FALSE, stringsAsFactors = FALSE)
 
 # Distinction between NM and NR genes
@@ -55,13 +51,13 @@ res_files <- lapply(unique(refseq_polyA[,"gene"]), function(gene) {
 	exon_start = strsplit(tab[,"exonStarts"], ",")
 	exon_end = strsplit(tab[,"exonEnds"], ",")
 
-	exon1s = sapply(exon_start, "[",1) #exon1s_min=min(exon1s)
-	exon1e = sapply(exon_end, "[",1)[which(exon1s == min(exon1s))] #exon1e_max=max(exon1e)
+	exon1s = sapply(exon_start, "[",1)
+	exon1e = sapply(exon_end, "[",1)[which(exon1s == min(exon1s))]
 	chosen_tr1 = tab[which(exon1e == max(exon1e))[1], "name"]
 	nb_exon_tr1 = tab[which(exon1e == max(exon1e))[1], "exonCount"]
 	
-	exonfe = sapply(exon_end,function(x){x[length(x)] }) 	#exonfe_max=max(exonfe)
- 	exonfs = sapply(exon_start,function(x){x[length(x)]})[which(exonfe == max(exonfe))]	#exonfs_min=min(exonfs)
+	exonfe = sapply(exon_end,function(x){x[length(x)] })
+ 	exonfs = sapply(exon_start,function(x){x[length(x)]})[which(exonfe == max(exonfe))]
 	chosen_trf = tab[which(exonfs == min(exonfs))[1], "name"] 
 	nb_exon_trf = tab[which(exonfs == min(exonfs))[1], "exonCount"]
 	
@@ -90,8 +86,6 @@ res_files_new_a <- data.frame(res_files_new[,1], res_files_new[,2], res_files_ne
 write.table(res_files_new_a, paste(out_dir, "whole_gene.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 
 res_last_exon <- matrix(unlist(sapply(res_files, "[",2)), ncol = 6, byrow = TRUE)
-#change the name like : chr_start_end_name_ExonNumber_NM_strand
-#name_res_last_exon<- paste(res_last_exon[,1],res_last_exon[,2],res_last_exon[,3],res_last_exon[,4],res_last_exon[,6], sep="_")
 res_last_exon_a <- data.frame(res_last_exon[,1], res_last_exon[,2], res_last_exon[,3], name_res_files, res_last_exon[,5], res_last_exon[,6])
 write.table(res_last_exon_a, paste(out_dir, "last_exon_gene.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 

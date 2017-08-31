@@ -24,6 +24,7 @@
 import argparse
 import os
 import re
+import gzip
 
 ## Tested with python 2.7.9
 removeStretchVersion = '1.2 - 03/04/2017'
@@ -40,6 +41,7 @@ if __name__ == '__main__':
 	dargs = vars(parser.parse_args())
 
 	inputFile = open(dargs["inputFile"],"r")
+#	inputFile = gzip.open(dargs["inputFile"],"r")
 	outputFile = open(dargs["outputFile"],"w")
 	minLengthReads = int(dargs["minLengthReads"])
 
