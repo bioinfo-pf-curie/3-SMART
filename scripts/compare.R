@@ -81,6 +81,7 @@ myData <- myDataB
 # Statistical model
 dds <- DESeqDataSetFromMatrix(countData = myData, colData = colData, design = ~ LE + condition + LE:condition)
 sizeFactors(dds) <- rep(sizeFactors(ddsNorm), 2)
+print(sizeFactors(dds))
 mydds <- DESeq(dds)
 res <- results(mydds,contrast = c(0,0,0,1))
 

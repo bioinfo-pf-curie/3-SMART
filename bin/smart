@@ -88,7 +88,7 @@ if [[ ! -z ${INPUT_LIST} ]]; then
     	echo
 	echo "Analysing "$i" file ..."
 	echo
-	out=`basename $i | sed -e 's/.bam$//g'`
+#	out=`basename $i | sed -e 's/.bam$//g'`
 	SAMPLE=`echo $line | ${AWK_PATH}/awk '{print $1}'`
 	${SCRIPTS}/getpeaks.sh -c ${CONF} -i $i -s all -n ${SAMPLE} -o ${OUTPUT}
     done < ${INPUT_LIST}
