@@ -76,7 +76,7 @@ How to use it ?
 **PART 1 : reads processing** 3-SMART can be used for a single sample. In order to use the pipeline, please set up the configuration according to your analysis, and run the following command to do the preprocessing data:
 
 
-    /script/getpeaks.sh -c CONFIG -i INPUT_FILE -s STEP -n SAMPLE -o OUTPUT_DIR [-h] [-v]
+    /scripts/getpeaks.sh -c CONFIG -i INPUT_FILE -s STEP -n SAMPLE -o OUTPUT_DIR [-h] [-v]
 
     -c: The configuration file
 
@@ -105,7 +105,7 @@ How to use it ?
 **PART 2 : annotation multisamples** Annotate peaks present in multiple samples. Run the following command to do the annotation of multiple samples:
 
 
-    /script/annot_multisamples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR [-h] [-v]
+    /scripts/annot_multisamples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR [-h] [-v]
 
     -c: The configuration file
 
@@ -136,7 +136,7 @@ This is a input list of BED files obtained thanks to the PART 1, for the PART 2,
 **PART 3 : differential analysis** Create a table of counts with all samples and make the differential analysis. Run the following command to do the differential analysis:
 
 
-    /script/compare_samples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR
+    /scripts/compare_samples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR
 
     -c: The configuration file
 
