@@ -128,15 +128,21 @@ do
     OUTPUT_TRIMMING=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_CLEAN} | sed -e 's/_clean.fastq$/_trimming_filter.fastq/'`
     if [[ ${NAME_STEP} == "trimming" || ${NAME_STEP} == "all" ]]; then
 	echo "Clean fastq ..."
-	cmd="${PYTHON_PATH}/python ${SCRIPTS}/selectFile.py -i ${INPUT} -o ${OUTPUT_CLEAN}"
+	cmd="${PYTHON_PATH}/python ${SCRIPTS}/selectFile.py -i ${INPUT} -o ${OUTPUT_CLEAN} 2>&1 > ${LOGS}/clean_fastq.log"
 	evalecho "$cmd"
 
         if [ ! -f ${OUTPUT_CLEAN} ]; then
 	    die " error: the *_clean.fastq file doesn't exist" 1>&2
 	fi
-	echo "Trimmed data ..."
-	cmd="${CUTADAPT_PATH}/cutadapt -g ${RD_1_SP} -a ${INDEX_SP} -n 2 -o ${OUTPUT_TRIMMING} ${OUTPUT_CLEAN} 2>&1 > ${LOGS}/cutadapt.log"
-	evalecho "$cmd"
+
+	if [ $LEXOGEN == 0 ]; then
+	    echo "Trimmed data ..."
+	    cmd="${CUTADAPT_PATH}/cutadapt -g ${RD_1_SP} -a ${INDEX_SP} -n 2 -o ${OUTPUT_TRIMMING} ${OUTPUT_CLEAN} 2>&1 > ${LOGS}/cutadapt.log"
+	    evalecho "$cmd"
+	else
+	    echo "You have chosen the Lexogen option, so the data will be not trim."
+	    continue 
+	fi
     fi
 
 ##############################################################################
@@ -145,23 +151,30 @@ do
 
 ## remove_stretchA step permits to remove the A stretch (with a minimum of 3 A in 3' side) and select reads with a minimum of nucleotides (${MIN_LENGTH_READS})
 
-    OUTPUT_STRETCH=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_TRIMMING} | sed -e 's/_trimming_filter.fastq$/_remove_stretchA.fastq/'`
-    if [[ ${NAME_STEP} == "remove_stretchA" || ${NAME_STEP} == "all" ]]; then
+    if [ $LEXOGEN == 0 ]; then
+	OUTPUT_STRETCH=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_TRIMMING} | sed -e 's/_trimming_filter.fastq$/_remove_stretchA.fastq/'`
+	if [[ ${NAME_STEP} == "remove_stretchA" || ${NAME_STEP} == "all" ]]; then
 ## File verification
-	if [ ! -f ${OUTPUT_TRIMMING} ]; then
-	    die " error: the *_trimming_filter.fastq file doesn't exist" 1>&2
+	    if [ ! -f ${OUTPUT_TRIMMING} ]; then
+	    	die " error: the *_trimming_filter.fastq file doesn't exist" 1>&2
+	    fi
+	    echo "Remove A stretch in 3' side..."
+	    cmd="${PYTHON_PATH}/python ${SCRIPTS}/removeStretchPolyA.py -input ${OUTPUT_TRIMMING} -output ${OUTPUT_STRETCH} -length ${MIN_LENGTH_READS}"
+	    evalecho "$cmd"
 	fi
-	echo "Remove A stretch in 3' side..."
-	cmd="${PYTHON_PATH}/python ${SCRIPTS}/removeStretchPolyA.py -input ${OUTPUT_TRIMMING} -output ${OUTPUT_STRETCH} -length ${MIN_LENGTH_READS}"
-	evalecho "$cmd"
     fi
 
 ################
 ###  FASTQC  ###
 ################
+
     if [[ ${NAME_STEP} == "fastqc" || ${NAME_STEP} == "all" ]]; then
-	if [ ! -f ${OUTPUT_STRETCH} ]; then
-	    die " error: the *_remove_stretchA.fastq file doesn't exist" 1>&2
+	if [ $LEXOGEN == 0 ]; then
+	    if [ ! -f ${OUTPUT_STRETCH} ]; then
+		die " error: the *_remove_stretchA.fastq file doesn't exist" 1>&2
+	    fi
+	else
+	    OUTPUT_STRETCH=${OUTPUT_CLEAN}
 	fi
 	echo "Fastqc ..."
         cmd="${FASTQC_PATH}/fastqc ${OUTPUT_STRETCH}"
@@ -174,7 +187,12 @@ do
 
 ## In this step, we use Bowtie2 as mapper. We decided to apply the MAPQ and after that, sort and index this file.
 
-    OUTPUT_SORT=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_STRETCH} | sed -e 's/_remove_stretchA.fastq$/_MAPQ_sort.bam/'`
+    if [ $LEXOGEN == 0 ]; then
+	OUTPUT_SORT=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_STRETCH} | sed -e 's/_remove_stretchA.fastq$/_MAPQ_sort.bam/'`
+    else
+	OUTPUT_STRETCH=${OUTPUT_CLEAN}
+	OUTPUT_SORT=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_CLEAN} | sed -e 's/_clean.fastq$/_MAPQ_sort.bam/'`
+    fi
 
     if [[ ${NAME_STEP} == "mapping" || ${NAME_STEP} == "all" ]]; then
 	if [ ! -f ${OUTPUT_STRETCH} ]; then
