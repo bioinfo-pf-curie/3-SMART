@@ -21,15 +21,15 @@ How to install it ?
 
 The following dependencies are required :
 
-* [R] (https://www.r-project.org/) (version 3.2.3) with the *RColorBrewer*, *ggplot2*, *rtracklayer*, *DESeq2*, *magrittr*, *dplyr*, *gplots*, *plyr* and *GenomicRanges* packages
+* [R] (https://www.r-project.org/) (version 3.4.0) with the *RColorBrewer (v1.1-2)*, *ggplot2 (v2.2.1)*, *rtracklayer (v1.36.3)*, *DESeq2 (v1.16.1)*, *magrittr (v1.5)*, *dplyr (v0.7.2)*, *gplots (v3.0.1)*, *plyr (v1.8.4)*, *stringr (v1.2.0)* and *GenomicRanges (v1.28.3)* packages
 
 * [Samtools] (http://samtools.sourceforge.net) (version 1.1)
 
-* [BEDTools] (http://bedtools.readthedocs.io/en/latest/content/installation.html) (version 2.17.0)
+* [BEDTools] (http://bedtools.readthedocs.io/en/latest/content/installation.html) (version 2.25.0)
 
-* [Python] (https://www.python.org/downloads/release/python-279) (version 2.7.9) with the *os*, *argparse*, *re* and *gzip* packages
+* [Python] (https://www.python.org/downloads/release/python-279) (version 2.7.12) with the *os*, *argparse (v1.1)*, *re (v2.2.1)* and *gzip* packages
 
-* [Cutadapt] (http://cutadapt.readthedocs.io/en/stable/installation.html) (version 1.8.2)
+* [Cutadapt] (http://cutadapt.readthedocs.io/en/stable/installation.html) (version 1.12)
 
 * [Bowtie2] (http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) (version 2.2.5)
 
@@ -37,7 +37,7 @@ The following dependencies are required :
 
 * [Picard\_tools] (https://broadinstitute.github.io/picard/)
 
-* [Fastqc] (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (version 0.10.1)
+* [Fastqc] (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (version 0.11.5)
 
 
 To install the 3-SMART pipeline, simply extract the archive and set up the configuration file with the paths to dependencies.
@@ -80,7 +80,7 @@ How to use it ?
 
     -c: The configuration file
 
-    -i: The fastq format file of the CLIP-seq sample. CAUTION: only the files in fastq.gz format are accepted.
+    -i: The fastq format file of the 3'-seq sample. CAUTION: only the files in fastq.gz format are accepted.
 
     -s: The steps of this pipeline that is to be launched. There are 6 differents steps: 
 	trimming: Remove reads which have had problems with the sequencer and remove adapters
@@ -133,7 +133,7 @@ This is a input list of BED files obtained thanks to the PART 1, for the PART 2,
 
 
 
-**PART 3 : differential analysis** If you want to compare treated VS untreated please enter treated samples before untreated samples. Run the following command to do the differential analysis:
+**PART 3 : differential analysis** Create a table of counts with all samples and make the differential analysis. Run the following command to do the differential analysis:
 
 
     /script/compare_samples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR
@@ -156,9 +156,9 @@ This is a input list of BED files obtained thanks to the PART 1, for the PART 2,
 This is a input list of BAM files obtained thanks to the PART 1, for the PART 3, *input_list_compare.txt*
 
 
-    Sample2        path/Sample2/Sample2_test_MAPQ_sort.bam        Test
-    Sample4        path/Sample4/Sample4_test_MAPQ_sort.bam        Test
-    Sample1        path/Sample1/Sample1_ctrl_MAPQ_sort.bam        Ctrl
-    Sample3        path/Sample3/Sample3_ctrl_MAPQ_sort.bam        Ctrl
+    Sample2        path/Sample2/Sample2_test_MAPQ_sort.bam        Test	1
+    Sample4        path/Sample4/Sample4_test_MAPQ_sort.bam        Test	1
+    Sample1        path/Sample1/Sample1_ctrl_MAPQ_sort.bam        Ctrl	0
+    Sample3        path/Sample3/Sample3_ctrl_MAPQ_sort.bam        Ctrl	0
 
 
