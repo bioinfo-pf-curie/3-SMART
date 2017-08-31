@@ -127,7 +127,7 @@ do
 ########################################
 
 ## Creation of a table of counts about merged peaks (to have the number of reads for each merged peaks for each sample)
-## After that, we remove peaks which are on different genes. Here we differencie NM and NR genes. If one peak is present on NM gene and NR gene, we remove this peak.
+## After that, we remove peaks which are on different genes.
 
     if [[ ${NAME_STEP} == "quantification" || ${NAME_STEP} == "all" ]]; then
         if [ ! -f ${OUTPUT_ALL}/merged_peaks_finallist_annot.tsv ]; then
@@ -143,16 +143,20 @@ do
 	    file="$file ${fn}"
         done
 
-        cmd="${AWK_PATH}/awk '(NR>1){OFS=\"\t\";print \$1,\$2,\$3,\$4,\$4,\$5,\$6,\$7,\$8}' ${OUTPUT_ALL}/merged_peaks_finallist_annot.tsv  | grep "mpeak" | ${BEDTOOLS_PATH}/bedtools multicov -s -bams $file -bed - > ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed"
-        evalecho "$cmd"
-
+	if [ $LEXOGEN == 0 ]; then
+            cmd="${AWK_PATH}/awk '(NR>1){OFS=\"\t\";print \$1,\$2,\$3,\$4,\$4,\$5,\$6,\$7,\$8}' ${OUTPUT_ALL}/merged_peaks_finallist_annot.tsv  | grep "mpeak" | ${BEDTOOLS_PATH}/bedtools multicov -s -bams $file -bed - > ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed"
+	    evalecho "$cmd"
+        else
+	    cmd="${AWK_PATH}/awk '(NR>1){OFS=\"\t\";print \$1,\$2,\$3,\$4,\$4,\$5,\$6,\$7,\$8}' ${OUTPUT_ALL}/merged_peaks_finallist_annot.tsv  | grep "mpeak" | ${BEDTOOLS_PATH}/bedtools multicov -S -bams $file -bed - > ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed"
+	    evalecho "$cmd"
+	fi
 
 	if [ ! -f ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed ]; then
 	    die " error: the merged_peaks_finallist_annot_qt.bed file doesn't exist" 1>&2
         fi
 	echo "Remove peaks which are on different genes ..."
 	name=`echo ${COMBINE_SAMPLE} | tr "," "\t"`
-	cmd="${AWK_PATH}/awk -v name=\"\$name\" 'BEGIN{OFS=\"\t\";print \"chr\",\"start\",\"end\",\"length\",\"length2\",\"strand\",\"peak\",\"merge\",\"status\",name,\"gene\";}{name=\"\";p=\"T\";split(\$7,a,\"|\");for(x in a){if(a[x] ~ /^chr/){split(a[x],b,\"_\");if(name==\"\"){name=b[2]\"_\"b[3];}else{if(p==\"T\" && name != b[2]\"_\"b[3]){p=\"F\";}}}};  if(p==\"T\"){OFS=\"\t\";print \$0,\$1\"_\"name;} }' ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed > ${OUTPUT_ALL}/merged_peaks_finallist_IanDif.bed"
+	cmd="${AWK_PATH}/awk -v name=\"\$name\" 'BEGIN{OFS=\"\t\";print \"chr\",\"start\",\"end\",\"length\",\"length2\",\"strand\",\"peak\",\"merge\",\"status\",name,\"gene\"}{genename=\"\";p=\"T\";split(\$7,a,\"|\");for(x in a){if(a[x] ~ /^chr/){split(a[x],b,\"_\");if(genename==\"\"){genename=b[4]}else{if(p==\"T\" && genename != b[4]){p=\"F\"}}}}; if(p==\"T\"){if(b[7] != 0){OFS=\"\t\";print \$0,\$1\"_\"genename\"_\"b[5]\"_\"b[6]}else{OFS=\"\t\";print \$0,\$1\"_\"genename\"_\"b[5]}}}' ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed > ${OUTPUT_ALL}/merged_peaks_finallist_IanDif.bed"
         evalecho "$cmd"
     fi
 

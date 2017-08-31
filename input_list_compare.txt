@@ -1,4 +1,4 @@
-Sample2	path/Sample2/Sample2_test_MAPQ_sort.bam	Test
-Sample4	path/Sample4/Sample4_test_MAPQ_sort.bam	Test
-Sample1	path/Sample1/Sample1_test_MAPQ_sort.bam	Ctrl
-Sample3	path/Sample3/Sample3_test_MAPQ_sort.bam	Ctrl
+Sample2	path/Sample2/Sample2_test_MAPQ_sort.bam	Test	1
+Sample4	path/Sample4/Sample4_test_MAPQ_sort.bam	Test	1
+Sample1	path/Sample1/Sample1_test_MAPQ_sort.bam	Ctrl	0
+Sample3	path/Sample3/Sample3_test_MAPQ_sort.bam	Ctrl	0

@@ -5,18 +5,16 @@
 ##  PATHS  ##
 #############
 
-CUTADAPT_PATH=/bioinfo/local/build/cutadapt-1.8-2/bin
-BOWTIE2_PATH=/bioinfo/local/build/bowtie2-2.2.5
-SAMTOOLS_PATH=/bioinfo/local/build/samtools-1.1/bin/
-BEDTOOLS_PATH=/bioinfo/local/build/BEDTools/BEDTools_2.17.0/bin 		# 2.21 exists but some options are deprecated
-#R_PATH=/bioinfo/local/build/R/R-3.2.3/bin
+CUTADAPT_PATH=/bioinfo/local/build/Centos/python/python-2.7.12/bin/cutadapt
+BOWTIE2_PATH=/bioinfo/local/build/Centos/bowtie2/bowtie2-2.2.5
+SAMTOOLS_PATH=/bioinfo/local/build/Centos/samtools/samtools-1.1/bin
+BEDTOOLS_PATH=/bioinfo/local/build/Centos/bedtools/bedtools-2.25.0/bin
 R_PATH=/bioinfo/local/build/Centos/R/R-3.4.0/bin
-PYTHON_PATH=/bioinfo/local/build/python-2.7.9/bin
+PYTHON_PATH=/bioinfo/local/build/Centos/python/python-2.7.12/bin
 AWK_PATH=/usr/bin
-JAVA_PATH=/bioinfo/local/build/Java/jdk1.7.0_45/bin
-PICARD_TOOLS=/bioinfo/local/picard-tools
-FASTQC_PATH=/bioinfo/local/build/FastQC_0.10.1
-
+JAVA_PATH=/bioinfo/local/build/Centos/java/jdk1.7.0_45/bin
+PICARD_TOOLS=/bioinfo/local/build/Centos/picard/1.97
+FASTQC_PATH=/bioinfo/local/build/Centos/FastQC/FastQC_v0.11.5
 
 
 ## Please change the variable settings below if necessary
@@ -79,14 +77,14 @@ MIN_NB_READS_PER_PEAK=5
 ##  PEAK FILTERING  ##
 ######################
 
-LEXOGEN=1
+LEXOGEN=0
 NB_STRETCH_POLYA=9
 MISM=1
 NB_STRETCH_CONSECUTIVE=6
-WINSIZE_DOWN=150
+WINSIZE_DOWN=50
 WINSIZE_UP=50
 KEEP_LE_PEAKS=1
-
+WINSIZE_DOWN_MOTIF=150
 
 ##################
 ##  ANNOTATION  ##

@@ -20,23 +20,18 @@ rownames(peaks) <- peaks$peak
 
 ## Get condition
 samples_id <- colnames(peaks)[10:(ncol(peaks) - 1)]
-group <- strsplit(group, ",")[[1]]
-## reorder 0/1
-group <- group[c(which(group == 0), which(group == 1))]
-samples_id <- samples_id[c(which(group == 0), which(group == 1))]
-stopifnot(length(samples_id) == length(group))
 
-design <- read.csv(input_list, sep = "\t", check.names = FALSE, header = FALSE)
-if (ncol(design == 3)) {
+design <- read.csv(input_list, sep = "\t", check.names = FALSE, header = FALSE, colClasses = c(rep("character",3)))
+
+if (ncol(design == 4)) {
   condition <- design[match(samples_id, design[,1]), 3]
-  condition <- c(rep(paste0(unique(as.character(condition[which(group == 0)])), collapse = "_"), length(which(group == 0))),
-                 rep(paste0(unique(as.character(condition[which(group == 1)])), collapse = "_"), length(which(group == 1))))
+  group <- design[match(samples_id, design[,1]), 4]
 }else{
-  condition <- group
+  print("the input_list_compare file is false")
 }
 
-condition <- as.factor(as.character(condition))
-cond <- c(paste0(as.character(unique(condition[which(group == 0)])), collapse = "_"), paste0(as.character(unique(condition[which(group == 1)])), collapse = "_"))
+cond <- c(unique(condition[group==1]), unique(condition[group==0]))
+condition <- as.factor(condition)
 print(samples_id)
 print(group)
 print(condition)
@@ -44,7 +39,7 @@ print(cond)
 
 ## Filering
 ### coverage sum by condition > MIN_COUNT_PER_COND
-peaks <- peaks[which(rowSums(peaks[,samples_id[which(group == 0)]]) >= as.numeric(min_count_cond) | rowSums(peaks[,samples_id[which(group == 1)]]) >= as.numeric(min_count_cond)),]
+peaks <- peaks[which(rowSums(peaks[,samples_id[group == 0]]) >= as.numeric(min_count_cond) | rowSums(peaks[,samples_id[group == 1]]) >= as.numeric(min_count_cond)),]
 print(dim(peaks))
 
 ## keep gene with at least 2 peaks
@@ -59,7 +54,7 @@ print(ddsNorm)
 
 ## DESEQ
 ## peakIntron vs LastExon (LE sum)
-Data4DESEQ <- group_by(peaks, gene) %>% do(res=PeakIntron_LastPeakSum(.)) %>% extract2(2) %>% rbind_all
+Data4DESEQ <- group_by(peaks, gene) %>% do(res=PeakIntron_LastPeakSum(.)) %>% extract2(2) %>% bind_rows
 rownames(Data4DESEQ) <- paste0(Data4DESEQ$chr,":",Data4DESEQ$start,"-",Data4DESEQ$end,":",Data4DESEQ$peak)
 
 LE <- c(rep("NLE", length(condition)), rep("LE", length(condition)))
@@ -75,21 +70,35 @@ RatLE_ELE <- (rowSums(myData[,(length(condition) + 1:length(condition))])/rowSum
 
 ## Add this 2 ratio at myData & make a plot
 NewMyData <- cbind(RatELE_LE, RatLE_ELE, myData)
-#write.table(file="NewMyData_ELE_LE_ratio_For_Histogramm.txt", NewMyData, col.names=T, row.names=T, quote=F, sep="\t")
 
 ## Select only the gene with at least ratioValue
 SelectPeak <- NewMyData[which(NewMyData[,1] >= as.numeric(ratioValue) & NewMyData[,2] >= as.numeric(ratioValue)),]
-#write.table(file="Peak_ratio.res", SelectPeak, col.names=T, row.names=T, quote=F, sep="\t")
 
 ## Remove columns RatELE_LE & RatLE_ELE
 myDataB <- SelectPeak[,-c(1:2)]
 myData <- myDataB
 
-#
+# Statistical model
 dds <- DESeqDataSetFromMatrix(countData = myData, colData = colData, design = ~ LE + condition + LE:condition)
 sizeFactors(dds) <- rep(sizeFactors(ddsNorm), 2)
+print(sizeFactors(dds))
 mydds <- DESeq(dds)
 res <- results(mydds,contrast = c(0,0,0,1))
+
+## Histogramm of pvalue & padj
+pdf(file = paste(dirname(peakfile), "/hist_pval_padj.pdf", sep=""))
+hist(res$pvalue, breaks=100, main="Histogramm of pvalue", xlab="pvalue")
+hist(res$padj, breaks=100, main="Histogramm of padj", xlab="padj")
+dev.off()
+
+## Hierarchical clustering
+cdslog <- log(counts(dds)+1)
+dist.cor <- 1-cor(cdslog, use="pairwise.complete.obs", method="spearman")
+hist.cor <- hclust(as.dist(dist.cor), method="ward.D")
+pdf(file = paste(dirname(peakfile), "/Ascending_hierarchical_classification.pdf", sep=""))
+plot(hist.cor, main=paste("samples classification by \n", nrow(cdslog), "peaks", sep=""), sub="Distance= 1-correlation")
+dev.off()
+
 
 NLE_cond1 <- which(colData[,"condition"] == cond[1] & colData[,"LE"] == "NLE")
 NLE_cond2 <- which(colData[,"condition"] == cond[2] & colData[,"LE"] == "NLE")

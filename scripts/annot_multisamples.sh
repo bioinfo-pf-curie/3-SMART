@@ -156,7 +156,7 @@ do
 	    die " error: the all_peaks.bed file doesn't exist" 1>&2
         fi
 	echo "Merge Peaks ..."
-        cmd="${BEDTOOLS_PATH}/sortBed -i ${OUTPUT_ALL}/all_peaks.bed | ${BEDTOOLS_PATH}/bedtools merge -s -n -i - | ${AWK_PATH}/awk 'BEGIN{OFS=\"\t\";c=1}{print \$1,\$2,\$3,\"mpeak_\"c,\$4,\$5;c=c+1}' > ${OUTPUT_ALL}/merged_peaks.bed"
+        cmd="${BEDTOOLS_PATH}/sortBed -i ${OUTPUT_ALL}/all_peaks.bed | ${BEDTOOLS_PATH}/bedtools merge -s -c 4 -o count -i - | ${AWK_PATH}/awk 'BEGIN{OFS=\"\t\";c=1}{print \$1,\$2,\$3,\"mpeak_\"c,\$5,\$4;c=c+1}' > ${OUTPUT_ALL}/merged_peaks.bed"
         evalecho "$cmd"
     fi
 
@@ -186,7 +186,7 @@ do
 	    die " error: the merged_peaks_finallist.bed file doesn't exist" 1>&2
         fi
 	echo "Peaks description ..."
-	cmd="${R_PATH}/R CMD BATCH \"--args org='${ORG}' peakfile='${OUTPUT_ALL}/merged_peaks_finallist.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' polyAfile='${POLYA_MOTIF}' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN}'\" ${SCRIPTS}/peaks_descriptor.R ${LOGS}/peaks_descriptor.Rout"
+	cmd="${R_PATH}/R CMD BATCH \"--args org='${ORG}' peakfile='${OUTPUT_ALL}/merged_peaks_finallist.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' polyAfile='${POLYA_MOTIF}' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN_MOTIF}'\" ${SCRIPTS}/peaks_descriptor.R ${LOGS}/peaks_descriptor.Rout"
 	evalecho "$cmd"
     fi
 
