@@ -5,7 +5,7 @@
 ##  PATHS  ##
 #############
 
-CUTADAPT_PATH=/bioinfo/local/build/Centos/python/python-2.7.12/bin/cutadapt
+CUTADAPT_PATH=/bioinfo/local/build/Centos/python/python-2.7.12/bin
 BOWTIE2_PATH=/bioinfo/local/build/Centos/bowtie2/bowtie2-2.2.5
 SAMTOOLS_PATH=/bioinfo/local/build/Centos/samtools/samtools-1.1/bin
 BEDTOOLS_PATH=/bioinfo/local/build/Centos/bedtools/bedtools-2.25.0/bin
