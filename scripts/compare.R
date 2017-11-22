@@ -12,6 +12,7 @@ require(gplots)
 require(dplyr)
 require(magrittr)
 require(stringr)
+require(FactoMineR)
 source(polyA_lib)
 
 ## Load Peaks file
@@ -62,22 +63,6 @@ colData <- data.frame(t(rbind("condition" = as.vector(condition), LE)))
 myData <- as.matrix(Data4DESEQ[,8:(ncol(Data4DESEQ))])
 rownames(myData) <- rownames(Data4DESEQ)
 
-## Ratio (ELE/LE)*100 
-RatELE_LE <- (rowSums(myData[,(1:length(condition))])/rowSums(myData[,(length(condition) + 1:length(condition))]))*100
-
-## Ratio (LE/ELE)*100 
-RatLE_ELE <- (rowSums(myData[,(length(condition) + 1:length(condition))])/rowSums(myData[,(1:length(condition))]))*100
-
-## Add this 2 ratio at myData & make a plot
-NewMyData <- cbind(RatELE_LE, RatLE_ELE, myData)
-
-## Select only the gene with at least ratioValue
-SelectPeak <- NewMyData[which(NewMyData[,1] >= as.numeric(ratioValue) & NewMyData[,2] >= as.numeric(ratioValue)),]
-
-## Remove columns RatELE_LE & RatLE_ELE
-myDataB <- SelectPeak[,-c(1:2)]
-myData <- myDataB
-
 # Statistical model
 dds <- DESeqDataSetFromMatrix(countData = myData, colData = colData, design = ~ LE + condition + LE:condition)
 sizeFactors(dds) <- rep(sizeFactors(ddsNorm), 2)
@@ -92,11 +77,28 @@ hist(res$padj, breaks=100, main="Histogramm of padj", xlab="padj")
 dev.off()
 
 ## Hierarchical clustering
-cdslog <- log(counts(dds)+1)
+cdslog <- log(resO[,7:(6+nrow(design))]+1)
 dist.cor <- 1-cor(cdslog, use="pairwise.complete.obs", method="spearman")
 hist.cor <- hclust(as.dist(dist.cor), method="ward.D")
 pdf(file = paste(dirname(peakfile), "/Ascending_hierarchical_classification.pdf", sep=""))
 plot(hist.cor, main=paste("samples classification by \n", nrow(cdslog), "peaks", sep=""), sub="Distance= 1-correlation")
+dev.off()
+
+## Histogram of baseMean
+require(tidyverse)
+dF <- data.frame(resO)
+dF <- rownames_to_column(dF) %>% as.tibble
+pp <- ggplot(dF, aes(x=pvalue))+geom_histogram(breaks=seq(0,1,length.out=20)) + facet_wrap(~ cut_number(baseMean,10))
+pdf(file = paste(dirname(peakfile), "/Histogram_of_baseMean.pdf", sep=""))
+plot(pp)
+dev.off()
+
+
+## PCA
+InvCts <- t(resO[,7:(6+nrow(design))])
+res.ACP <- PCA(InvCts, ncp=2, graph=FALSE)
+pdf(file = paste(dirname(peakfile), "/PCA.pdf", sep=""))
+plot(res.ACP, ann=T)
 dev.off()
 
 
