@@ -53,14 +53,14 @@ message(length(rois)," loaded")
 
 
 message("Extract flanking regions [",wsizedown,"] ...")
-fseq <- getFlankingRegions(rois, wdwn = as.numeric(wsizedown), wup = NA, genome)
+fseq <- getFlankingRegions(rois, wdwn = as.numeric(wsizedown), wup = as.numeric(wsizeup), genome)
 
 ## A stretch
-message("Look for 'A' stretch in downstream regions [",nstretch," - ",mism,"]...")
-rois.stretch <- containsStretch(fseq$dwn, stretch = "A", slen = as.numeric(nstretch), mm = as.numeric(mism))
+message("Look for 'A' stretch in upstream & downstream regions [",nstretch," - ",mism,"]...")
+rois.stretch <- containsStretch(fseq$updw, stretch = "A", slen = as.numeric(nstretch), mm = as.numeric(mism))
 message("Discarding ",length(which(rois.stretch == TRUE)), " peaks")
-message("Look for 'A' stretch in downstream regions [",nstretchcons," - ",mism,"]...")
-rois.stretch2 <- containsStretch(fseq$dwn, stretch = "A", slen = as.numeric(nstretchcons), mm = 0)
+message("Look for 'A' stretch in upstream & downstream regions [",nstretchcons," - ",mism,"]...")
+rois.stretch2 <- containsStretch(fseq$updw, stretch = "A", slen = as.numeric(nstretchcons), mm = 0)
 message("Discarding ",length(which(rois.stretch2 == TRUE)), " peaks")
 
 pname <- rois[which(!unlist(rois.stretch) & !unlist(rois.stretch2))]$name
