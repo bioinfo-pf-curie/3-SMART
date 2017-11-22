@@ -186,7 +186,7 @@ do
 	    die " error: the merged_peaks_finallist.bed file doesn't exist" 1>&2
         fi
 	echo "Peaks description ..."
-	cmd="${R_PATH}/R CMD BATCH \"--args org='${ORG}' peakfile='${OUTPUT_ALL}/merged_peaks_finallist.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' polyAfile='${POLYA_MOTIF}' wsizeup='${WINSIZE_UP}' wsizedown='${WINSIZE_DOWN_MOTIF}'\" ${SCRIPTS}/peaks_descriptor.R ${LOGS}/peaks_descriptor.Rout"
+	cmd="${R_PATH}/R CMD BATCH \"--args org='${ORG}' peakfile='${OUTPUT_ALL}/merged_peaks_finallist.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' polyAfile='${POLYA_MOTIF}' wsizeup='${WINSIZE_UP_MOTIF}' wsizedown='${WINSIZE_DOWN_MOTIF}'\" ${SCRIPTS}/peaks_descriptor.R ${LOGS}/peaks_descriptor.Rout"
 	evalecho "$cmd"
     fi
 
