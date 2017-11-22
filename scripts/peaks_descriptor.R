@@ -124,33 +124,22 @@ ggplot(z, aes(x=nb, y=counts, fill=win)) + geom_bar(stat="identity", position="d
   theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.position="bottom")
 dev.off()
 
-## Percentage peaks with or without motifs
+## Percentage peaks with motifs
 
-mnp <- np[as.character(0:1)]
-names(mnp) <- as.character(0:1)
-mnp["0"] <- mnp["0"]/sum(np)*100
-mnp["1"] <- (mnp["1"] + sum(np[which(as.numeric(rownames(np))>1)]))/sum(np)*100
 
-mnu <- nu[as.character(0:1)]
-names(mnu) <- as.character(0:1)
-mnu["0"] <- mnu["0"]/sum(nu)*100
-mnu["1"] <- (mnu["1"] + sum(nu[which(as.numeric(rownames(nu))>1)]))/sum(nu)*100
+mnp <- sum(np[which(as.numeric(rownames(np))>=1)])/sum(np)*100
 
-mnd <- nd[as.character(0:1)]
-names(mnd) <- as.character(0:1)
-mnd["0"] <- mnd["0"]/sum(nd)*100
-mnd["1"] <- (mnd["1"] + sum(nd[which(as.numeric(rownames(nd))>1)]))/sum(nd)*100
+mnu <- sum(nu[which(as.numeric(rownames(nu))>=1)])/sum(nu)*100
 
-mnud <- nud[as.character(0:1)]
-names(mnud) <- as.character(0:1)
-mnud["0"] <- mnud["0"]/sum(nud)*100
-mnud["1"] <- (mnud["1"] + sum(nud[which(as.numeric(rownames(nud))>1)]))/sum(nud)*100
+mnd <- sum(nd[which(as.numeric(rownames(nd))>=1)])/sum(nd)*100
 
-z <- data.frame(nb=c(0:1,0:1,0:1,0:1), counts=c(mnp, mnu, mnd, mnud), win=c(rep("Peaks", 2), rep("Upstream", 2), rep("Downstream", 2), rep("Upstream-Downstream", 2)))
+mnud <- sum(nud[which(as.numeric(rownames(nud))>=1)])/sum(nud)*100
 
-outfile <- sub(".bed$", "_WithOrWithout_polyA_ppeak.pdf", peakfile)
+z <- data.frame(nb="with at least 1 motif", counts=c(mnp, mnu, mnd, mnud), win=c("Peaks", "Upstream", "Downstream", "Upstream-Downstream"))
+
+outfile <- sub(".bed$", "_With_polyA_ppeak.pdf", peakfile)
 pdf(file=outfile)
-ggplot(z, aes(x=nb, y=counts, fill=win)) + geom_bar(stat="identity", position="dodge") + ylab("Peaks Percentage") + xlab("Motifs Per Peak") + scale_fill_manual(values=c("grey50", "firebrick4","lightsteelblue3","seagreen4"), name="")+
+ggplot(z, aes(x=nb, y=counts, fill=win)) + geom_bar(stat="identity", position="dodge") + ylab("Peaks Percentage") + xlab("Peak with motifs") + scale_fill_manual(values=c("grey50", "firebrick4","lightsteelblue3","seagreen4"), name="")+
   theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.position="bottom")
 dev.off()
 
@@ -193,14 +182,14 @@ dwnmotif <- colSums(padw)
 updwnmotif <- colSums(paupdw)
 z <- data.frame(motif=names(upmotif), peak=pmotif/sum(pmotif)*100, up=upmotif/sum(upmotif)*100, dwn=dwnmotif/sum(dwnmotif)*100, updw=updwnmotif/sum(updwnmotif)*100)
 mypal <- colorRampPalette( brewer.pal( 9 , "RdBu" ) )
-p1 <- ggplot(z, aes(x = motif, y=peak, fill=motif)) + geom_bar(width = 1, stat="identity") + coord_polar(theta="x") + xlab("") + ylab("") +
-  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=6))
-p2 <- ggplot(z, aes(x = motif, y=up, fill=motif)) + geom_bar(width = 1, stat="identity") + coord_polar(theta="x") + xlab("") + ylab("") +
-  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=6))
-p3 <- ggplot(z, aes(x = motif, y=dwn, fill=motif)) + geom_bar(width = 1, stat="identity") + coord_polar(theta="x") + xlab("") + ylab("") +
-  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=6))
-p4 <- ggplot(z, aes(x = motif, y=updw, fill=motif)) + geom_bar(width = 1, stat="identity") + coord_polar(theta="x") + xlab("") + ylab("") +
-  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=6))
+p1 <- ggplot(z, aes(x = motif, y=peak, fill=motif)) + geom_bar(width = 1, stat="identity") + xlab("motifs") + ylab("percentage of motifs") +
+  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=8))
+p2 <- ggplot(z, aes(x = motif, y=up, fill=motif)) + geom_bar(width = 1, stat="identity") + xlab("motifs") + ylab("percentage of motifs") +
+  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=8))
+p3 <- ggplot(z, aes(x = motif, y=dwn, fill=motif)) + geom_bar(width = 1, stat="identity") + xlab("motifs") + ylab("percentage of motifs") +
+  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=8))
+p4 <- ggplot(z, aes(x = motif, y=updw, fill=motif)) + geom_bar(width = 1, stat="identity") + xlab("motifs") + ylab("percentage of motifs") +
+  scale_fill_manual(values=mypal(length(levels(z$motif))), name="") +  theme(axis.text=element_text(size=9), axis.title=element_text(face="bold", size=10), legend.text=element_text(size=8))
 
 outfile <- sub(".bed$", "_peak_polyAsites.pdf", peakfile)
 pdf(file=outfile)
@@ -212,12 +201,12 @@ pdf(file=outfile)
 plot(p2)
 dev.off()
 
-outfile <- sub(".bed$", "dwn_polyAsites.pdf", peakfile)
+outfile <- sub(".bed$", "_dwn_polyAsites.pdf", peakfile)
 pdf(file=outfile)
 plot(p3)
 dev.off()
 
-outfile <- sub(".bed$", "updwn_polyAsites.pdf", peakfile)
+outfile <- sub(".bed$", "_updwn_polyAsites.pdf", peakfile)
 pdf(file=outfile)
 plot(p4)
 dev.off()
