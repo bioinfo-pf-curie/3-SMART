@@ -212,7 +212,7 @@ do
 	fi
 	echo "Mapping Quality >= ${MIN_MAPQ} ..."
 	echo "Sorting ..."
-	cmd="${SAMTOOLS_PATH}/samtools view -b -q ${MIN_MAPQ} ${MAPPING}/accepted_hits.sam | ${SAMTOOLS_PATH}/samtools sort -O bam -T prefix.bam - -o ${OUTPUT_SORT}"
+	cmd="${SAMTOOLS_PATH}/samtools view -b -q ${MIN_MAPQ} ${MAPPING}/accepted_hits.sam | ${SAMTOOLS_PATH}/samtools sort -O bam -T ${OUTPUT}/${SAMPLE}/prefix.bam - -o ${OUTPUT_SORT}"
 	evalecho "$cmd"
 	cmd="${SAMTOOLS_PATH}/samtools index ${OUTPUT_SORT}"
 	evalecho "$cmd"
