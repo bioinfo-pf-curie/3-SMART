@@ -43,18 +43,10 @@ getFlankingRegions <- function(x, wdwn = NA, wup = NA, genome) {
     updwpgrT <- trim(flank(updwpgr, width = as.numeric(wdwn + wup), start = TRUE))
     updwseq <- getSeq(genome, names = updwpgrT)
     names(updwseq) <- elementMetadata(x)$name
-  } 
-
-
+  }
+ 
   ##
   ## Extract sequences and reverse complement if necessary
-
-
-  ## Do not need to reverse complement. This is already done by getSeq !!
-  ##useq[which(strand(x)=="-")] <- reverseComplement(useq[which(strand(x)=="-")])
-  ##dseq[which(strand(x)=="-")] <- reverseComplement(dseq[which(strand(x)=="-")])
-  #fseq <- mapply(list, up=as.list(useq), dw=as.list(dseq), SIMPLIFY=FALSE)
-  #names(fseq) <- elementMetadata(x)$name
   if (is.na(wdwn) | is.na(wup)) {
     return(list(peak = peakseq, up = useq, dwn = dseq))
   }else{
@@ -139,13 +131,13 @@ loadAnnotData <- function(con, random = FALSE) {
 ## annot = Genomic ranges of exon description
 ## invert = invert annotation, i.e intronic regions
 ##
-filterPeaksOnAnnotation <- function(x, annot, invert = FALSE, ...){
+filterPeaksOnAnnotation <- function(x, annot, invert = FALSE, ...){##, extend=5){
 
   if (invert) {
     message("Invert Annotation ...")
     grl <- split(annot, annot$symbol)
     geneRanges <- range(grl)
-    annot <- unlist(setdiff(geneRanges, grl))
+    annot <- unlist(psetdiff(geneRanges, grl))
   }
   
   ## Select peaks on annotation

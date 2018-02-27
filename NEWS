@@ -1,4 +1,24 @@
 ***********************************
+CHANGES IN VERSION 2.0.2
+
+NEW FEATURES
+
+   o  Remove option add in version 2.0.1: The peaks for which the percentage of the intronic last exon on the last exon exceeds the indicated threshold are kept.
+
+   o  Add replicate option for the automate differential analysis part that takes into account the replicates
+
+***********************************
+CHANGES IN VERSION 2.0.1
+
+NEW FEATURES
+
+   o  Add a new option: The peaks for which the percentage of the intronic last exon on the last exon exceeds the indicated threshold are kept.
+
+   o  Add Lexogen option
+
+   o  Migration of all scripts Debian -> CentOS 
+
+***********************************
 CHANGES IN VERSION 2.0.0
 
 NEW FEATURES
@@ -6,12 +26,6 @@ NEW FEATURES
    o Change the workflow order. 
 
    o Integrate a trimming and mapping step in this workflow. A complete workflow which input file is fastq.gz format.
-
-   o Add a new option: The peaks for which the percentage of the intronic last exon on the last exon exceeds the indicated threshold are kept.
-
-   o Add a lexogen option: Choose this option if your protocol of the library preparation is QuantSeq REV kit. 
-
-   o Migration of all scripts Debian -> CentOS
 
 ***********************************
 CHANGES IN VERSION 0.5.0

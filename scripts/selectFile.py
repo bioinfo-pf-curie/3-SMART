@@ -7,15 +7,15 @@ import gzip
 parser = argparse.ArgumentParser(description = 'SCRIPT TO SELECT THE SEQUENCES WITHOUT PROBLEM OF SEQUENCING')
 
 parser.add_argument('-i','--input', help = 'input file (fastq casava)', required = True)
-parser.add_argument("-o", "--output", help = "output file - fastq with N sequences", required = True) 
+parser.add_argument("-o", "--output", help = "output file - fastq with N sequences", required = True)
 args = parser.parse_args()
 
 
 input_file = args.input
 output_file = args.output
 
-
 input_file=gzip.open(input_file,'rb')
+
 output_file = open(output_file, 'w')
 
 

@@ -1,4 +1,4 @@
-Sample2	path/Sample2/Sample2_test_peaks_filt.bed	Test
-Sample4	path/Sample4/Sample4_test_peaks_filt.bed	Test
-Sample1	path/Sample1/Sample1_test_peaks_filt.bed	Ctrl
-Sample3	path/Sample3/Sample3_test_peaks_filt.bed	Ctrl
+ctrlR1	path_to_ctrlR1_peaks_filt.bed	ctrl
+ctrlR2	path_to_ctrlR2_peaks_filt.bed	ctrl
+testR1	path_to_testR1_peaks_filt.bed	test
+testR2	path_to_testR2_peaks_filt.bed	test

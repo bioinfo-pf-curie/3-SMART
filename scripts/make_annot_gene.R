@@ -9,6 +9,7 @@ for (i in 1:la)
 eval(parse(text = args[[i]]))
 }
 
+
 refseq <- read.table(infile, header = TRUE, comment.char = "~", check.names = FALSE, stringsAsFactors = FALSE)
 
 # Distinction between NM and NR genes
@@ -51,13 +52,13 @@ res_files <- lapply(unique(refseq_polyA[,"gene"]), function(gene) {
 	exon_start = strsplit(tab[,"exonStarts"], ",")
 	exon_end = strsplit(tab[,"exonEnds"], ",")
 
-	exon1s = sapply(exon_start, "[",1)
-	exon1e = sapply(exon_end, "[",1)[which(exon1s == min(exon1s))]
+	exon1s = sapply(exon_start, "[",1) #exon1s_min=min(exon1s)
+	exon1e = sapply(exon_end, "[",1)[which(exon1s == min(exon1s))] #exon1e_max=max(exon1e)
 	chosen_tr1 = tab[which(exon1e == max(exon1e))[1], "name"]
 	nb_exon_tr1 = tab[which(exon1e == max(exon1e))[1], "exonCount"]
 	
-	exonfe = sapply(exon_end,function(x){x[length(x)] })
- 	exonfs = sapply(exon_start,function(x){x[length(x)]})[which(exonfe == max(exonfe))]
+	exonfe = sapply(exon_end,function(x){x[length(x)] }) 	#exonfe_max=max(exonfe)
+ 	exonfs = sapply(exon_start,function(x){x[length(x)]})[which(exonfe == max(exonfe))]	#exonfs_min=min(exonfs)
 	chosen_trf = tab[which(exonfs == min(exonfs))[1], "name"] 
 	nb_exon_trf = tab[which(exonfs == min(exonfs))[1], "exonCount"]
 	
@@ -90,7 +91,6 @@ res_last_exon_a <- data.frame(res_last_exon[,1], res_last_exon[,2], res_last_exo
 write.table(res_last_exon_a, paste(out_dir, "last_exon_gene.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
 
 res_files_wgwole <- matrix(unlist(sapply(res_files, "[",3)), ncol = 6, byrow = TRUE)
-#change the name like : chr_start_end_name_NM_strand
 name_res_wgwole<- paste(res_files_wgwole[,1],res_files_wgwole[,2],res_files_wgwole[,3],res_files_wgwole[,4],res_files_wgwole[,6], sep="_")
 res_files_wgwole_a <- data.frame(res_files_wgwole[,1],res_files_wgwole[,2],res_files_wgwole[,3],name_res_wgwole,res_files_wgwole[,5], res_files_wgwole[,6])
 write.table(res_files_wgwole_a, paste(out_dir, "whole_gene_wo_last_exon.bed", sep = "/"), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")

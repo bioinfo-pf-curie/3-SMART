@@ -4,7 +4,7 @@ set -o pipefail  # trace ERR through pipes
 set -o errexit   ## set -e : exit the script if any statement returns a non-true return value
 
 SOFT="3-SMART"
-VERSION="2.0"
+VERSION="2.0.2"
 
 ################
 ##  Function  ##
@@ -42,12 +42,12 @@ help()
     echo " *** $SOFT  $VERSION ***"
     echo
     echo "OPTIONS"
-    echo "    -c CONFIG : configuration file for 3-SMART processing"
-    echo "    -l LIST : input list file; 3 columns with the sample id, path of bam file and condition of samples to compare"
+    echo "    -c CONFIG : configuration file for $SOFT processing"
+    echo "    -l LIST : input list file; 4 columns with the sample id, path of bam file, condition of samples to compare and the id of condition (1 for test, 0 for ctrl)"
     echo "    -s STEP : run all or only a subset of the $SOFT workflow"
     echo "	  all : run all workflow"
     echo "	  quantification : create a table of counts of samples to compare and filter them"
-    echo " 	  differential_analysis : do a differential analysis with samples to compare"
+    echo " 	  differential_analysis : make a differential analysis with samples to compare"
     echo "    -o OUTPUT : output folder"
     echo "    [-h] : help"
     echo "    [-v] : version"
@@ -142,7 +142,6 @@ do
 	    input=${OUTPUT}/${dname}/${dname}_MAPQ_sort.bam
 	    file="$file ${fn}"
         done
-
 	if [ $LEXOGEN == 0 ]; then
             cmd="${AWK_PATH}/awk '(NR>1){OFS=\"\t\";print \$1,\$2,\$3,\$4,\$4,\$5,\$6,\$7,\$8}' ${OUTPUT_ALL}/merged_peaks_finallist_annot.tsv  | grep "mpeak" | ${BEDTOOLS_PATH}/bedtools multicov -s -bams $file -bed - > ${OUTPUT_ALL}/merged_peaks_finallist_annot_qt.bed"
 	    evalecho "$cmd"

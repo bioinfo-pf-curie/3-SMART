@@ -12,7 +12,6 @@ require(gplots)
 require(dplyr)
 require(magrittr)
 require(stringr)
-require(FactoMineR)
 source(polyA_lib)
 
 ## Load Peaks file
@@ -30,6 +29,15 @@ if (ncol(design == 4)) {
 }else{
   print("the input_list_compare file is false")
 }
+
+## If we want to add replicates in the statistical model
+#if (ncol(design == 5)) {
+#  condition <- design[match(samples_id, design[,1]), 3]
+#  replicate <- design[match(samples_id, design[,1]), 4]
+#  group <- design[match(samples_id, design[,1]), 5]
+#}else{
+#  print("the input_list_compare file is false")
+#}
 
 cond <- c(unique(condition[group==1]), unique(condition[group==0]))
 condition <- as.factor(condition)
@@ -59,16 +67,22 @@ Data4DESEQ <- group_by(peaks, gene) %>% do(res=PeakIntron_LastPeakSum(.)) %>% ex
 rownames(Data4DESEQ) <- paste0(Data4DESEQ$chr,":",Data4DESEQ$start,"-",Data4DESEQ$end,":",Data4DESEQ$peak)
 
 LE <- c(rep("NLE", length(condition)), rep("LE", length(condition)))
+#repli <- rep(replicate, 2)		## If we want to add replicates in the statistical model
+#colData <- data.frame(t(rbind("condition" = as.vector(condition), LE, "replicate" = as.vector(repli))))		## If we want to add replicates in the statistical model
 colData <- data.frame(t(rbind("condition" = as.vector(condition), LE)))
 myData <- as.matrix(Data4DESEQ[,8:(ncol(Data4DESEQ))])
 rownames(myData) <- rownames(Data4DESEQ)
 
-# Statistical model
+
+## Statistical model
 dds <- DESeqDataSetFromMatrix(countData = myData, colData = colData, design = ~ LE + condition + LE:condition)
+#dds <- DESeqDataSetFromMatrix(countData = myData, colData = colData, design = ~ LE + condition + LE:condition + replicate)	## Statistical model with replicate 
 sizeFactors(dds) <- rep(sizeFactors(ddsNorm), 2)
 print(sizeFactors(dds))
 mydds <- DESeq(dds)
 res <- results(mydds,contrast = c(0,0,0,1))
+#res <- results(mydds,contrast = c(0,0,0,0,0,1))		## Statistical model with replicate 
+
 
 ## Histogramm of pvalue & padj
 pdf(file = paste(dirname(peakfile), "/hist_pval_padj.pdf", sep=""))
@@ -77,30 +91,12 @@ hist(res$padj, breaks=100, main="Histogramm of padj", xlab="padj")
 dev.off()
 
 ## Hierarchical clustering
-cdslog <- log(resO[,7:(6+nrow(design))]+1)
+cdslog <- log(counts(dds)+1)
 dist.cor <- 1-cor(cdslog, use="pairwise.complete.obs", method="spearman")
 hist.cor <- hclust(as.dist(dist.cor), method="ward.D")
 pdf(file = paste(dirname(peakfile), "/Ascending_hierarchical_classification.pdf", sep=""))
 plot(hist.cor, main=paste("samples classification by \n", nrow(cdslog), "peaks", sep=""), sub="Distance= 1-correlation")
 dev.off()
-
-## Histogram of baseMean
-require(tidyverse)
-dF <- data.frame(resO)
-dF <- rownames_to_column(dF) %>% as.tibble
-pp <- ggplot(dF, aes(x=pvalue))+geom_histogram(breaks=seq(0,1,length.out=20)) + facet_wrap(~ cut_number(baseMean,10))
-pdf(file = paste(dirname(peakfile), "/Histogram_of_baseMean.pdf", sep=""))
-plot(pp)
-dev.off()
-
-
-## PCA
-InvCts <- t(resO[,7:(6+nrow(design))])
-res.ACP <- PCA(InvCts, ncp=2, graph=FALSE)
-pdf(file = paste(dirname(peakfile), "/PCA.pdf", sep=""))
-plot(res.ACP, ann=T)
-dev.off()
-
 
 NLE_cond1 <- which(colData[,"condition"] == cond[1] & colData[,"LE"] == "NLE")
 NLE_cond2 <- which(colData[,"condition"] == cond[2] & colData[,"LE"] == "NLE")
@@ -126,7 +122,6 @@ write.table(resOUp, file = outUpfile, col.names = TRUE, row.names = TRUE, sep = 
 
 
 ## Make plots
-
 pdf(file = paste(dirname(peakfile), "/diffan_heatmap.pdf", sep=""))
 
 par(font.lab = 2, cex = .8)

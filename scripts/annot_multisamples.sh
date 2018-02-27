@@ -4,7 +4,7 @@ set -o pipefail  # trace ERR through pipes
 set -o errexit   ## set -e : exit the script if any statement returns a non-true return value
 
 SOFT="3-SMART"
-VERSION="2.0"
+VERSION="2.0.2"
 
 ################
 ##  Function  ##
@@ -41,11 +41,11 @@ help()
     echo " ***$SOFT  $VERSION ***"
     echo
     echo "OPTIONS"
-    echo "    -c CONFIG : configuration file for 3-SMART processing"
+    echo "    -c CONFIG : configuration file for $SOFT processing"
     echo "    -l LIST : input list file; 3 columns with the sample id, path and condition of samples to compare"
     echo "    -s STEP : run all or only a subset of the $SOFT workflow"
     echo "	  all : run all workflow"
-    echo "	  merge_peaks : Concatenation of all peak files (3-SMART data)"
+    echo "	  merge_peaks : Concatenation of all peak files ($SOFT data)"
     echo " 	  annotate_peaks : Annotate peaks - Annotation based on Gene level"
     echo " 	  peaks_description : Create pictures with motifs and peaks"
     echo "    -o OUTPUT : output folder"

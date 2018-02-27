@@ -93,6 +93,4 @@ transcripts[is.na(transcripts[,6]),6] <- rep("0", length(transcripts[is.na(trans
 #Save the table
 
 write.table(transcripts[,c(1,2,3,4,6,5)], paste(out, '/transcriptsType.bed', sep = ""), quote = FALSE, col.names = FALSE, row.names = FALSE, sep = "\t")
-#transcripts<-read.table("~/PolyAseq/tableTranscrits/transcriptsType.bed",sep="\t")
-#colnames(transcripts)<-c("chr","start","end","name","strand","type")
 

@@ -108,12 +108,52 @@ is_le <- filterPeaksOnAnnotation(pois, le.gr, minoverlap = as.numeric(le_overlap
 exons.gr <- loadAnnotData(TRSAnnotFile)
 is_intron <- filterPeaksOnAnnotation(pois, exons.gr, invert = TRUE,  minoverlap = as.numeric(intron_overlap))
 
+#finalpeaks <- unique(c(is_le$name, is_intron$name))
+#pois.filt <- pois[finalpeaks]
+
+#message("Discarded peaks=", length(pois)-length(pois.filt))
+#message("Peaks of interest=",length(pois.filt))
+
+## Export list of peaks
+#message("Export results ...")
+#outfile <- sub(".bed$", "_notlastexons_notintron.bed", peakfile)
+#export(pois[setdiff(pois$name, pois.filt$name)], con=outfile)
+
+#outfile <- sub(".bed$", "_finallist.bed", peakfile)
+#export(pois.filt, format="bed", con=outfile)
+
 
 ###################################################################
 ##
 ## Peak Annotation 
 ##
 ###################################################################
+
+## ## PolyA site
+## pois.filt.fseq=list()
+## pois.filt.fseq$up=fseq$up[names(pois.filt)]
+## pois.filt.fseq$dw=fseq$dw[names(pois.filt)]
+
+## polyA <- read.csv(polyAfile, header=FALSE)
+## polyA <- as.list(as.character(polyA[,1]))
+## names(polyA) <- unlist(polyA)
+
+
+## ## PolyA motifs
+## message("Look for known polyA site ...")
+## paup <- containsPolyAsignal(pois.filt.fseq$up, polyA)
+## rownames(paup) <- names(pois.filt.fseq$up)
+## padw <- containsPolyAsignal(pois.filt.fseq$dw, polyA)
+## rownames(padw) <- names(pois.filt.fseq$dw)
+
+## print(colSums(paup))
+## print(colSums(padw))
+
+## outfile <- sub(".bed$", "_up_polyAsites.csv", peakfile)
+## write.csv(paup, file=outfile, quote=FALSE)
+## outfile <- sub(".bed$", "_dw_polyAsites.csv", peakfile)
+## write.csv(padw, file=outfile, quote=FALSE)                  
+
 
 ## Load annotation
 message("Annotate Peaks ...")
@@ -123,6 +163,7 @@ pois.le.nr <- annotatePeaks(pois, le.gr[grep("NR",le.gr$nm)], outfile = sub(".be
 pois.le.nm <- annotatePeaks(pois, le.gr[grep("NM",le.gr$nm)],  outfile = sub(".bed$", "_NM_LE_annot.bed", peakfile), minover = as.numeric(minover))
 pois.ele.nr <- annotatePeaks(pois, ele.gr[grep("NR",ele.gr$nm)], outfile = sub(".bed$", "_NR_ELE_annot.bed", peakfile), minover = as.numeric(minover))
 pois.ele.nm <- annotatePeaks(pois, ele.gr[grep("NM",ele.gr$nm)], outfile = sub(".bed$", "_NM_ELE_annot.bed", peakfile), minover = as.numeric(minover))
+
 
 
 ov <- as.list(findOverlaps(subject = pois.le.nm, query = pois, type = "equal", select = "all"))

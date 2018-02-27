@@ -13,8 +13,9 @@ R_PATH=/bioinfo/local/build/Centos/R/R-3.4.0/bin
 PYTHON_PATH=/bioinfo/local/build/Centos/python/python-2.7.12/bin
 AWK_PATH=/usr/bin
 JAVA_PATH=/bioinfo/local/build/Centos/java/jdk1.7.0_45/bin
-PICARD_TOOLS=/bioinfo/local/build/Centos/picard/1.97
+#PICARD_TOOLS=/bioinfo/local/build/Centos/picard/1.97
 FASTQC_PATH=/bioinfo/local/build/Centos/FastQC/FastQC_v0.11.5
+
 
 
 ## Please change the variable settings below if necessary
@@ -23,8 +24,8 @@ FASTQC_PATH=/bioinfo/local/build/Centos/FastQC/FastQC_v0.11.5
 ##  DIR  ##
 ###########
 
-SCRIPTS=/myGitHub/3-smart/scripts
-ANNOT_DIR=/myGitHub/3-smart/annotation
+SCRIPTS=/bioinfo/users/mcadix/myGitLab/3-smart/scripts
+ANNOT_DIR=/bioinfo/users/mcadix/myGitLab/3-smart/annotation
 
 
 ################
@@ -51,7 +52,7 @@ BOWTIE2_INDEX=/data/annotations/Human/hg19/bowtie2_indexes/base/hg19
 ##  REMOVE DUPLICATED READS  ##
 ###############################
 
-REMOVE_DUPLICATES=0
+#REMOVE_DUPLICATES=0
 
 
 ##################
@@ -62,9 +63,6 @@ BUILD_ANNOT=0
 ORG=hg19
 UCSC_EXPORT=refseq_export_hg19.csv
 POLYA_MOTIF=./annotation/polyA_signal.csv
-MIN_LE_OV=1
-MIN_INTRON_OV=3
-MIN_ANNOT_OV=1
 
 
 ######################
@@ -84,17 +82,26 @@ LEXOGEN=0
 NB_STRETCH_POLYA=9
 MISM=1
 NB_STRETCH_CONSECUTIVE=6
-WINSIZE_DOWN=50
-WINSIZE_UP=50
+WINSIZE_DOWN=150
+WINSIZE_UP=0
 KEEP_LE_PEAKS=1
-WINSIZE_UP_MOTIF=50
 WINSIZE_DOWN_MOTIF=150
+WINSIZE_UP_MOTIF=50
+
+##################
+##  ANNOTATION  ##
+##################
+
+MIN_LE_OV=1
+MIN_INTRON_OV=3
+MIN_ANNOT_OV=1
 
 
 #########################
 ##  SAMPLE COMPARISON  ##
 #########################
 
-COMBINE_SAMPLE=19,23,27,18,22,26
+COMBINE_SAMPLE=2,6,10,1,5,9
 COMPARE_SAMPLE=1,1,1,0,0,0
-MIN_COUNT_PER_COND=10
+MIN_COUNT_PER_COND=15
+KEEP_REPLICATES=0

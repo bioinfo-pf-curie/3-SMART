@@ -10,6 +10,8 @@ What is the 3-SMART pipeline ?
 
 3-SMART (3'-Seq Mapping Annotation and Regulation Tool) was setup to process 3' sequencing data from sequencing reads.
 It includes the trimming, mapping, peak detection, filtering, annotation and differential analysis.
+If you use it, please cite :
+*##*
 
 Contact
 -------
@@ -35,15 +37,14 @@ The following dependencies are required :
 
 * [Java/jdk] (http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) (version 1.7.0\_45)
 
-* [Picard\_tools] (https://broadinstitute.github.io/picard/)
-
 * [Fastqc] (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (version 0.11.5)
 
 
 To install the 3-SMART pipeline, simply extract the archive and set up the configuration file with the paths to dependencies.
 
-    unzip 3-SMART-2.0.zip
-    cd 3-SMART-2.0
+
+    tar -zxvf smart_2.0.0.tar.gz
+    cd smart_2.0.0
 
 
 Annotation Files
@@ -73,7 +74,7 @@ To treat reads with adapter, it is necessary to know adapters 5' (P5) and 3' (P7
 How to use it ?
 ---------------
 
-**PART 1 : reads processing** 3-SMART can be used for a single sample. In order to use the pipeline, please set up the configuration according to your analysis, and run the following command to do the preprocessing data:
+**PART 1 : reads processing** 3-SMART can be used for a single sample. In order to use the pipeline, please set up the configuration according to your analysis, and run the following command to make the preprocessing data:
 
 
     /scripts/getpeaks.sh -c CONFIG -i INPUT_FILE -s STEP -n SAMPLE -o OUTPUT_DIR [-h] [-v]
@@ -87,7 +88,6 @@ How to use it ?
 	remove_stretchA: Remove A stretch in 3' side and select a read size
 	fastqc: Quality control for fastq file
 	mapping: Map reads with bowtie2 and use the mapping quality to select reads. On this step we create a sort and index file.
-	duplicate_reads: Remove (or only mark) the duplicated reads
 	peak_calling: Detect peaks
 	filter_peaks: Select peaks without stretch of genomic A in reads
 	all: Launch all previous step
@@ -102,7 +102,7 @@ How to use it ?
 
 
 
-**PART 2 : annotation multisamples** Annotate peaks present in multiple samples. Run the following command to do the annotation of multiple samples:
+**PART 2 : annotation multisamples** Annotate peaks present in multiple samples. Run the following command to make the annotation of multiple samples:
 
 
     /scripts/annot_multisamples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR [-h] [-v]
@@ -133,7 +133,7 @@ This is a input list of BED files obtained thanks to the PART 1, for the PART 2,
 
 
 
-**PART 3 : differential analysis** Create a table of counts with all samples and make the differential analysis. Run the following command to do the differential analysis:
+**PART 3 : differential analysis**  Create a table of counts with all samples and make the differential analysis. Run the following command to make the differential analysis:
 
 
     /scripts/compare_samples.sh -c CONFIG -l INPUT_LIST -s STEP -o OUTPUT_DIR
@@ -156,9 +156,8 @@ This is a input list of BED files obtained thanks to the PART 1, for the PART 2,
 This is a input list of BAM files obtained thanks to the PART 1, for the PART 3, *input_list_compare.txt*
 
 
-    Sample2        path/Sample2/Sample2_test_MAPQ_sort.bam        Test	1
-    Sample4        path/Sample4/Sample4_test_MAPQ_sort.bam        Test	1
-    Sample1        path/Sample1/Sample1_ctrl_MAPQ_sort.bam        Ctrl	0
-    Sample3        path/Sample3/Sample3_ctrl_MAPQ_sort.bam        Ctrl	0
-
+    Sample2        path/Sample2/Sample2_test_MAPQ_sort.bam        Test        1
+    Sample4        path/Sample4/Sample4_test_MAPQ_sort.bam        Test        1
+    Sample1        path/Sample1/Sample1_ctrl_MAPQ_sort.bam        Ctrl        0
+    Sample3        path/Sample3/Sample3_ctrl_MAPQ_sort.bam        Ctrl        0
 

@@ -52,7 +52,7 @@ seqinfo(rois) <- seqinfo(genome)[seqlevels(rois)]
 message(length(rois)," loaded")
 
 
-message("Extract flanking regions [",wsizedown,"] ...")
+message("Extract flanking regions [-",wsizeup,";+",wsizedown,"] ...")
 fseq <- getFlankingRegions(rois, wdwn = as.numeric(wsizedown), wup = as.numeric(wsizeup), genome)
 
 ## A stretch

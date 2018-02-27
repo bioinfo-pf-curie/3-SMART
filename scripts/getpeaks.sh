@@ -4,7 +4,7 @@ set -o pipefail  # trace ERR through pipes
 set -o errexit   ## set -e : exit the script if any statement returns a non-true return value
 
 SOFT="3-SMART"
-VERSION="2.0"
+VERSION="2.0.2"
 
 ################
 ##  Function  ##
@@ -41,7 +41,7 @@ help()
     echo " ***$SOFT  $VERSION ***"
     echo
     echo "OPTIONS"
-    echo "    -c CONFIG : configuration file for 3-SMART processing"
+    echo "    -c CONFIG : configuration file for $SOFT processing"
     echo "    -i INPUT : input file; fastq.gz format"
     echo "    -s STEP : run all or only a subset of the $SOFT workflow"
     echo "	  all : run all workflow"
@@ -164,9 +164,7 @@ do
 	fi
     fi
 
-################
-###  FASTQC  ###
-################
+##  FASTQC  ##
 
     if [[ ${NAME_STEP} == "fastqc" || ${NAME_STEP} == "all" ]]; then
 	if [ $LEXOGEN == 0 ]; then
@@ -194,25 +192,24 @@ do
 	OUTPUT_SORT=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_CLEAN} | sed -e 's/_clean.fastq$/_MAPQ_sort.bam/'`
     fi
 
+
     if [[ ${NAME_STEP} == "mapping" || ${NAME_STEP} == "all" ]]; then
-	if [ ! -f ${OUTPUT_STRETCH} ]; then
-	    die " error: the *_remove_stretchA.fastq file doesn't exist" 1>&2
-	fi
 	## mapping_Tophat folder
 	MAPPING=${OUTPUT}/${SAMPLE}/mapping_Bowtie2
 	if [ ! -d ${MAPPING} ]; then
 	    mkdir -p ${MAPPING}
 	fi
+
 	echo "Mapping with Bowtie2 ..."
 	cmd="${BOWTIE2_PATH}/bowtie2 -x ${BOWTIE2_INDEX} -q ${OUTPUT_STRETCH} -N ${MAX_MISMATCH_SEED} -L ${SEED_LENGTH} -k ${RANDOM_HIT} -S ${MAPPING}/accepted_hits.sam"
 	evalecho "$cmd"
-
+	
 	if [ ! -f ${MAPPING}/accepted_hits.sam ]; then
 	    die " error: the accepted_hits.sam file in mapping_Bowtie2 folder doesn't exist" 1>&2
 	fi
 	echo "Mapping Quality >= ${MIN_MAPQ} ..."
 	echo "Sorting ..."
-	cmd="${SAMTOOLS_PATH}/samtools view -b -q ${MIN_MAPQ} ${MAPPING}/accepted_hits.sam | ${SAMTOOLS_PATH}/samtools sort -O bam -T ${OUTPUT}/${SAMPLE}/prefix.bam - -o ${OUTPUT_SORT}"
+	cmd="${SAMTOOLS_PATH}/samtools view -b -q ${MIN_MAPQ} ${MAPPING}/accepted_hits.sam | ${SAMTOOLS_PATH}/samtools sort -O bam -T prefix.bam - -o ${OUTPUT_SORT}"
 	evalecho "$cmd"
 	cmd="${SAMTOOLS_PATH}/samtools index ${OUTPUT_SORT}"
 	evalecho "$cmd"
@@ -224,11 +221,11 @@ do
 
 ## duplicate_reads step permits to remove OR mark duplicated reads. (Duplicated read is a reads with the same sequence and the same length)
 
-    OUTPUT_RM_DUPLICATED_READS=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_SORT} | sed -e 's/_MAPQ_sort.bam$/_rm_duplicated_reads.bam/'`
+    OUTPUT_RM_DUPLICATED_READS=${OUTPUT}/${SAMPLE}/`basename ${OUTPUT_SORT} | sed -e 's/_sort.bam$/_rm_duplicated_reads.bam/'`
 
     if [[ ${NAME_STEP} == "duplicate_reads" || ${NAME_STEP} == "all" ]]; then
 	if [ ! -f ${OUTPUT_SORT} ]; then
-	    die " error: the *_MAPQ_sort.bam file doesn't exist" 1>&2
+	    die " error: the *_sort.bam file doesn't exist" 1>&2
 	fi
 	if [ "${REMOVE_DUPLICATES}" = 1 ]; then
 	    echo "Remove Duplicated reads ..."
@@ -251,7 +248,7 @@ do
 
     if [[ ${NAME_STEP} == "peak_calling" || ${NAME_STEP} == "all" ]]; then
 	if [ ! -f ${OUTPUT_SORT} ]; then
-	    die " error: the *_MAPQ_sort.bam file doesn't exist" 1>&2
+	    die " error: the *_sort.bam file doesn't exist" 1>&2
 	fi
 	echo "Get Peaks ..."
         echo "Peak Detection ..."
@@ -262,7 +259,7 @@ do
 ################################
 ###  Build Annotation files  ###
 ################################
-    if [[ ${BUILD_ANNOT} == 1 ]]; then
+    if [ $BUILD_ANNOT == 1 ]; then
         echo "Build annotation files ..."             
         ## Create gene file
 	cmd="${R_PATH}/R CMD BATCH \"--args infile='${ANNOT_DIR}/${ORG}/${UCSC_EXPORT}' out_dir='${ANNOT_DIR}/${ORG}'\" ${SCRIPTS}/make_annot_gene.R ${LOGS}/make_annot_gene.Rout"
