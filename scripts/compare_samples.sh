@@ -167,7 +167,7 @@ do
 	    die " error: the merged_peaks_finallist_IanDif.bed file doesn't exist" 1>&2
         fi
 	echo "Differential analysis ..."
-	cmd="${R_PATH}/R CMD BATCH \"--args peakfile='${OUTPUT_ALL}/merged_peaks_finallist_IanDif.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' input_list='${INPUT_LIST}' group='${COMPARE_SAMPLE}' min_count_cond='${MIN_COUNT_PER_COND}' ratioValue='${PERCENT_VALUE_RATIO}'\" ${SCRIPTS}/compare.R ${LOGS}/compare.Rout"
+	cmd="${R_PATH}/R CMD BATCH \"--args peakfile='${OUTPUT_ALL}/merged_peaks_finallist_IanDif.bed' polyA_lib='${SCRIPTS}/polyA_lib.R' input_list='${INPUT_LIST}' min_count_cond='${MIN_COUNT_PER_COND}'\" ${SCRIPTS}/compare.R ${LOGS}/compare.Rout"
 	evalecho "$cmd"
     fi
 
